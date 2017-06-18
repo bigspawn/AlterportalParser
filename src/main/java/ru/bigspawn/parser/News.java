@@ -34,6 +34,51 @@ public class News {
         this.imageURL = imageURL;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public String getTextForMessage() {
+        return title + '\n' + "Категория: " + type + '\n' + genre + '\n' + format + '\n' + country + '\n'
+                + "Дата: " + Worker.formatter.print(dateTime) + '\n' + "Плейлист: \n" + playlist + '\n' + downloadURL;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        News news = (News) o;
+
+        if (title != null ? !title.equals(news.title) : news.title != null) return false;
+        if (type != news.type) return false;
+        if (dateTime != null ? !dateTime.toDateMidnight().isEqual(news.dateTime.toDateMidnight()) : news.dateTime != null) return false;
+        if (genre != null ? !genre.equals(news.genre) : news.genre != null) return false;
+        if (format != null ? !format.equals(news.format) : news.format != null) return false;
+        if (country != null ? !country.equals(news.country) : news.country != null) return false;
+        if (playlist != null ? !playlist.equals(news.playlist) : news.playlist != null) return false;
+        if (downloadURL != null ? !downloadURL.equals(news.downloadURL) : news.downloadURL != null) return false;
+        return imageURL != null ? imageURL.equals(news.imageURL) : news.imageURL == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = title != null ? title.hashCode() : 0;
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (dateTime != null ? dateTime.hashCode() : 0);
+        result = 31 * result + (genre != null ? genre.hashCode() : 0);
+        result = 31 * result + (format != null ? format.hashCode() : 0);
+        result = 31 * result + (country != null ? country.hashCode() : 0);
+        result = 31 * result + (playlist != null ? playlist.hashCode() : 0);
+        result = 31 * result + (downloadURL != null ? downloadURL.hashCode() : 0);
+        result = 31 * result + (imageURL != null ? imageURL.hashCode() : 0);
+        return result;
+    }
+
     @Override
     public String toString() {
         return "News{" +

@@ -1,0 +1,1 @@
+START javaw -jar ./target/AlterportalParser.jar 
