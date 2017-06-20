@@ -1,5 +1,5 @@
 CREATE TABLE news_test (
-  id_news      INT PRIMARY KEY DEFAULT NEXTVAL('news_ids'),
+  id_news      INT PRIMARY KEY DEFAULT NEXTVAL('news_test_ids'),
   title        VARCHAR(255),
   id_news_type INT REFERENCES news_type (id_news_type),
   date         TIMESTAMP,

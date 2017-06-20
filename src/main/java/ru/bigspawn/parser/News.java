@@ -42,6 +42,10 @@ public class News {
         return imageURL;
     }
 
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
     public String getTextForMessage() {
         return title + '\n' + "Категория: " + type + '\n' + genre + '\n' + format + '\n' + country + '\n'
                 + "Дата: " + Worker.formatter.print(dateTime) + '\n' + "Плейлист: \n" + playlist + '\n' + downloadURL;

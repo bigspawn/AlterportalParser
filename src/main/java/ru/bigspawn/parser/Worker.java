@@ -194,7 +194,11 @@ public class Worker implements Runnable {
                                         ps2.setString(9, newsImageUrl);
                                         ps2.execute();
                                         logger.info("Add news: " + news.getTitle() + " - to DB");
-                                        bot.sendNewsToChanel(news, Configs.getInstance().getTELEGRAM_CHANEL());
+                                        try {
+                                            bot.sendNewsToChanel(news, Configs.getInstance().getTELEGRAM_CHANEL());
+                                        } catch (Exception e) {
+                                            logger.error(e, e);
+                                        }
                                     } else {
                                         key = true;
                                         break;
