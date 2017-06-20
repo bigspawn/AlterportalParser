@@ -4,8 +4,6 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -20,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ru.bigspawn.parser.Main.newsArrayList;
 import static ru.bigspawn.parser.Main.logger;
 
 /**
@@ -28,10 +25,10 @@ import static ru.bigspawn.parser.Main.logger;
  */
 public class Worker implements Runnable {
     public static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
-    private static final String INSERT_NEWS = "INSERT INTO news " +
+    private static final String INSERT_NEWS = "INSERT INTO news_test " +
             "(title, id_news_type, date, gender, format, country, playlist, download_url, image_url) " +
             "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SELECT_NEWS = "SELECT * FROM news WHERE title = ?";
+    private static final String SELECT_NEWS = "SELECT * FROM news_test WHERE title = ?";
 
     private MyBot bot;
     private WebClient client;

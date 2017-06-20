@@ -1,4 +1,4 @@
-CREATE TABLE news (
+CREATE TABLE news_test (
   id_news      INT PRIMARY KEY DEFAULT NEXTVAL('news_ids'),
   title        VARCHAR(255),
   id_news_type INT REFERENCES news_type (id_news_type),
@@ -12,7 +12,7 @@ CREATE TABLE news (
 );
 
 
-CREATE SEQUENCE news_ids;
+CREATE SEQUENCE news_test_ids;
 CREATE SEQUENCE news_type_ids;
 
 CREATE TABLE news_type (
