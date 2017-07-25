@@ -20,58 +20,46 @@ import static ru.bigspawn.parser.Main.logger;
  * Created by bigspawn on 15.06.2017.
  */
 public class MyBot extends TelegramLongPollingBot {
-    private WebClient client = new WebClient();
-    private HtmlPage page;
-    private int counter;
 
-    public void sendNewsToChanel(News news, String chatId) throws Exception {
-        SendPhoto sendPhotoRequest = new SendPhoto();
-        sendPhotoRequest.setChatId(chatId);
-        sendPhotoRequest.setPhoto(news.getImageURL());
-        sendMessageToChannel(news, chatId, sendPhotoRequest);
-    }
+  private WebClient client = new WebClient();
+  private HtmlPage page;
+  private int counter;
 
-    private void sendMessageToChannel(News news, String chatId, SendPhoto sendPhotoRequest) throws Exception {
-        try {
-            sendPhoto(sendPhotoRequest);
-            sendMessage(new SendMessage(chatId, news.getTextForMessage()));
-            logger.info("Send new news: " + news.getTitle() + "to channel");
-        } catch (TelegramApiException e) {
-            logger.error(e, e);
-            try {
-                counter++;
-                page = client.getPage(news.getImageURL());
-            } catch (IOException ex) {
-                logger.error(ex, ex);
-            } catch (Exception e1) {
-                logger.error(e1, e1);
-                if (counter < 3) {
-                    sendNewsToChanel(news, chatId);
-                } else {
-                    counter = 0;
-                    throw new Exception("Max counter!");
-                }
-            }
-        }
-    }
+  public void sendNewsToChanel(News news, String chatId) throws Exception {
+    SendPhoto sendPhotoRequest = new SendPhoto();
+    sendPhotoRequest.setChatId(chatId);
+    sendPhotoRequest.setPhoto(news.getImageURL());
+    sendMessageToChannel(news, chatId, sendPhotoRequest);
+  }
 
-    @Override
-    public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage message = new SendMessage()
-                    .setChatId(update.getMessage().getChatId())
-                    .setText(update.getMessage().getText());
-            logger.info("Bot get message: " + message);
-        }
+  private void sendMessageToChannel(News news, String chatId, SendPhoto sendPhotoRequest)
+      throws Exception {
+    try {
+      sendPhoto(sendPhotoRequest);
+      sendMessage(new SendMessage(chatId, news.getTextForMessage()));
+      logger.info("Send new news: " + news.getTitle() + "to channel");
+    } catch (TelegramApiException e) {
+      logger.error(e, e);
     }
+  }
 
-    @Override
-    public String getBotUsername() {
-        return Configs.getInstance().getTELEGRAM_BOT_NAME();
+  @Override
+  public void onUpdateReceived(Update update) {
+    if (update.hasMessage() && update.getMessage().hasText()) {
+      SendMessage message = new SendMessage()
+          .setChatId(update.getMessage().getChatId())
+          .setText(update.getMessage().getText());
+      logger.info("Bot get message: " + message);
     }
+  }
 
-    @Override
-    public String getBotToken() {
-        return Configs.getInstance().getTELEGRAM_BOT();
-    }
+  @Override
+  public String getBotUsername() {
+    return Configs.getInstance().getTELEGRAM_BOT_NAME();
+  }
+
+  @Override
+  public String getBotToken() {
+    return Configs.getInstance().getTELEGRAM_BOT();
+  }
 }
