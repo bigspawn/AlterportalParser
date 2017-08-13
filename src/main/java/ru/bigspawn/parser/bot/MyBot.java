@@ -1,7 +1,8 @@
 package ru.bigspawn.parser.bot;
 
+import static ru.bigspawn.parser.Main.logger;
+
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
@@ -11,32 +12,36 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.bigspawn.parser.Configs;
 import ru.bigspawn.parser.News;
 
-import java.io.IOException;
-import java.util.List;
-
-import static ru.bigspawn.parser.Main.logger;
-
 /**
  * Created by bigspawn on 15.06.2017.
  */
 public class MyBot extends TelegramLongPollingBot {
 
-  private WebClient client = new WebClient();
-  private HtmlPage page;
-  private int counter;
-
   public void sendNewsToChanel(News news, String chatId) throws Exception {
+    if (news.getImageURL() != null) {
+      sendPhotoIntoChannel(news, chatId);
+    }
+    String textForMessage = news.getTextForMessage();
+    if (textForMessage != null && !textForMessage.isEmpty()) {
+      sendMessageToChannel(news, chatId);
+    }
+  }
+
+  private void sendPhotoIntoChannel(News news, String chatId) {
     SendPhoto sendPhotoRequest = new SendPhoto();
     sendPhotoRequest.setChatId(chatId);
     sendPhotoRequest.setPhoto(news.getImageURL());
-    sendMessageToChannel(news, chatId, sendPhotoRequest);
-  }
-
-  private void sendMessageToChannel(News news, String chatId, SendPhoto sendPhotoRequest)
-      throws Exception {
     try {
       sendPhoto(sendPhotoRequest);
-      sendMessage(new SendMessage(chatId, news.getTextForMessage()));
+    } catch (TelegramApiException e) {
+      logger.error(e, e);
+    }
+  }
+
+  private void sendMessageToChannel(News news, String chatId) {
+    SendMessage message = new SendMessage(chatId, news.getTextForMessage());
+    try {
+      sendMessage(message);
       logger.info("Send new news: " + news.getTitle() + "to channel");
     } catch (TelegramApiException e) {
       logger.error(e, e);

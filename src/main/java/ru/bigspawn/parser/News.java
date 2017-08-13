@@ -17,6 +17,9 @@ public class News {
   private String downloadURL;
   private String imageURL;
 
+  public News() {
+  }
+
   public News(String title, NewsType type) {
     this.title = title;
     this.type = type;
@@ -47,11 +50,82 @@ public class News {
     this.imageURL = imageURL;
   }
 
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public NewsType getType() {
+    return type;
+  }
+
+  public void setType(NewsType type) {
+    this.type = type;
+  }
+
+  public DateTime getDateTime() {
+    return dateTime;
+  }
+
+  public void setDateTime(DateTime dateTime) {
+    this.dateTime = dateTime;
+  }
+
+  public String getGenre() {
+    return genre;
+  }
+
+  public void setGenre(String genre) {
+    this.genre = genre;
+  }
+
+  public String getFormat() {
+    return format;
+  }
+
+  public void setFormat(String format) {
+    this.format = format;
+  }
+
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
+  }
+
+  public String getPlaylist() {
+    return playlist;
+  }
+
+  public void setPlaylist(String playlist) {
+    this.playlist = playlist;
+  }
+
+  public String getDownloadURL() {
+    return downloadURL;
+  }
+
+  public void setDownloadURL(String downloadURL) {
+    this.downloadURL = downloadURL;
+  }
+
   public String getTextForMessage() {
-    return title + '\n' + "Категория: " + type + '\n' + genre + '\n' + format + '\n' + country
-        + '\n'
-        + "Дата: " + Worker.formatter.print(dateTime) + '\n' + "Плейлист: \n" + playlist + '\n'
-        + downloadURL;
+    StringBuilder builder = new StringBuilder();
+    builder.append(title).append('\n')
+        .append("Категория: ").append(type).append('\n')
+        .append(genre).append('\n');
+    if (format != null && !format.isEmpty()) {
+      builder.append(format).append('\n');
+    }
+    if (country != null && !country.isEmpty()) {
+      builder.append(country).append('\n');
+    }
+    builder.append("Дата: ").append(Worker.formatter.print(dateTime)).append('\n')
+        .append("Плейлист: \n")
+        .append(playlist).append('\n')
+        .append(downloadURL);
+    return builder.toString();
   }
 
   @Override

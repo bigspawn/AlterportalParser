@@ -13,7 +13,7 @@ public enum NewsType {
   Industrial("Industrial"),
   Rock("Rock"),
   Experimental("Experimental"),
-  Lossless("Аудио CD (lossless)"),
+  Lossless("Аудио CD"),
   NewTracks("Новые треки"),
   Concerts("Концерты");
 
