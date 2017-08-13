@@ -38,7 +38,7 @@ public class Worker implements Runnable {
       "INSERT INTO news_test "
           + "(title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
           + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
-  private static final String SELECT_NEWS = "SELECT * FROM news_test WHERE title = ? AND id_news_type = ?";
+  private static final String SELECT_NEWS = "SELECT * FROM news_test WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
 
   private MyBot bot;
   private WebClient client = new WebClient();
@@ -46,6 +46,8 @@ public class Worker implements Runnable {
   private String url;
   private Connection connection;
   private boolean key;
+  private static final int MAX_REPEAT_NEWS = 10;
+  private int newsCounter;
 
   public Worker(MyBot bot) throws UnsupportedEncodingException {
     this.bot = bot;
@@ -58,7 +60,9 @@ public class Worker implements Runnable {
     try {
       Class.forName("org.postgresql.Driver");
       connection = DriverManager
-          .getConnection("jdbc:postgresql://localhost:15432/alterportal_news", "bigspawn",
+          .getConnection(
+              "jdbc:postgresql://localhost:15432/alterportal_news",
+              "bigspawn",
               "52169248");
     } catch (ClassNotFoundException | SQLException e) {
       logger.error(e, e);
@@ -88,10 +92,8 @@ public class Worker implements Runnable {
           List<HtmlElement> titleTds = element.getElementsByAttribute("td", "class", "category");
           if (titleTds != null && !titleTds.isEmpty()) {
             String newsCategory = titleTds.get(0).asText().trim();
-            Optional<NewsType> optional = Arrays
-                .stream(NewsType.values())
-                .filter(
-                    x -> newsCategory.equals(x.getName()))
+            Optional<NewsType> optional = Arrays.stream(NewsType.values())
+                .filter(x -> newsCategory.equals(x.getName()))
                 .findFirst();
             if (optional.isPresent()) {
               NewsType type = optional.get();
@@ -103,13 +105,12 @@ public class Worker implements Runnable {
               List<HtmlElement> newsElements = page.getByXPath("//*[@id=\"dle-content\"]");
               if (newsElements != null && !newsElements.isEmpty()) {
                 HtmlElement newsElement = newsElements.get(0);
-
-
                 News news = new News();
                 news.setType(type);
                 news.setTitle(getNewsTitle(newsElement));
 
-                HtmlElement newsBodyHtmlElement = (HtmlElement) newsElement.getByXPath("//div[contains(@id, \"news-id\")]").get(0);
+                HtmlElement newsBodyHtmlElement = (HtmlElement) newsElement
+                    .getByXPath("//div[contains(@id, \"news-id\")]").get(0);
                 ArrayList<String> lines = getNewsAsStringArray(newsBodyHtmlElement);
                 news.setGenre(getNewsTag(lines, "Стиль", "Жанр"));
                 if (type != NewsType.Concerts) {
@@ -128,26 +129,26 @@ public class Worker implements Runnable {
                   news.setImageURL(imageUrl);
                   news.setDownloadURL(getHref(aElements));
                 }
-
                 news.setDateTime(getDateTime(newsElement));
-                logger.info("Create new item: " + news);
-                if (checkIfNewAlreadyInDatabase(news)) {
-                  break;
-                } else {
+                newsCounter++;
+                if (!ifNewsAlreadyPosted(news)) {
+                  insetNewsToDatabase(news);
                   sendNewsToChannel(news);
+                  logger.info("Sleep 10 seconds");
+                  TimeUnit.SECONDS.sleep(10);
+                } else {
+                  key = pageNumber != 1 || newsCounter >= MAX_REPEAT_NEWS;
+                  logger.info("Are we still in a first page? - " + !key + " - And count is " + newsCounter);
+                  if (key) {
+                    break;
+                  }
                 }
-                logger.info("Sleep 10 seconds");
-                TimeUnit.SECONDS.sleep(10);
               }
             }
           }
         }
         if (key) {
-          pageNumber = 1;
-          url = getPageURL();
-          key = false;
-          logger.info("Has not new news. Sleep 30 minutes");
-          TimeUnit.MINUTES.sleep(30);
+          sleep();
         } else {
           pageNumber++;
           url = getPageURL();
@@ -157,6 +158,16 @@ public class Worker implements Runnable {
       }
     }
     logger.info("Stop worker");
+  }
+
+  private void sleep() throws UnsupportedEncodingException, InterruptedException {
+    logger.info("All news repeated on page: " + pageNumber);
+    pageNumber = 1;
+    newsCounter = 0;
+    url = getPageURL();
+    key = false;
+    logger.info("Waiting for new news. Sleep 30 minutes");
+    TimeUnit.MINUTES.sleep(30);
   }
 
   private ArrayList<String> getNewsAsStringArray(HtmlElement newsBodyHtmlElement) {
@@ -177,8 +188,9 @@ public class Worker implements Runnable {
   }
 
   private void findNewsTag(ArrayList<String> lines, StringBuilder countryBuilder, String tag) {
-    Optional<String> country = lines.stream().filter(
-        line -> StringUtils.containsIgnoreCase(line, tag)).findFirst();
+    Optional<String> country = lines.stream()
+        .filter(line -> StringUtils.containsIgnoreCase(line, tag))
+        .findFirst();
     country.ifPresent(countryBuilder::append);
   }
 
@@ -215,34 +227,22 @@ public class Worker implements Runnable {
 
   private void sendNewsToChannel(News news) {
     try {
+      logger.info("Try send news: " + news);
       bot.sendNewsToChanel(news, Configs.getInstance().getTELEGRAM_CHANEL());
     } catch (Exception e) {
       logger.error(e, e);
     }
   }
 
-  private boolean checkIfNewAlreadyInDatabase(News news) {
+  private boolean ifNewsAlreadyPosted(News news) {
     PreparedStatement ps = null;
-    PreparedStatement ps2 = null;
     try {
       ps = connection.prepareStatement(SELECT_NEWS);
       ps.setString(1, news.getTitle());
+      ps.setString(2, news.getType().getName());
       ResultSet rs = ps.executeQuery();
-      if (!rs.next()) {
-        ps2 = connection.prepareStatement(INSERT_NEWS);
-        ps2.setString(1, news.getTitle());
-        ps2.setString(2, news.getType().getName());
-        ps2.setTimestamp(3, new Timestamp(news.getDateTime().getMillis()));
-        ps2.setString(4, news.getGenre());
-        ps2.setString(5, news.getFormat());
-        ps2.setString(6, news.getCountry());
-        ps2.setString(7, news.getPlaylist());
-        ps2.setString(8, news.getDownloadURL());
-        ps2.setString(9, news.getImageURL());
-        ps2.execute();
-        logger.info("Add news: " + news.getTitle() + " - to DB");
-      } else {
-        key = true;
+      if (rs.next()) {
+        logger.info("News '" + news.getTitle() + "' is already posted!");
         return true;
       }
     } catch (SQLException e) {
@@ -255,15 +255,35 @@ public class Worker implements Runnable {
           logger.error(e, e);
         }
       }
-      if (ps2 != null) {
+    }
+    return false;
+  }
+
+  private void insetNewsToDatabase(News news) {
+    PreparedStatement ps = null;
+    try {
+      ps = connection.prepareStatement(INSERT_NEWS);
+      ps.setString(1, news.getTitle());
+      ps.setString(2, news.getType().getName());
+      ps.setTimestamp(3, new Timestamp(news.getDateTime().getMillis()));
+      ps.setString(4, news.getGenre());
+      ps.setString(5, news.getFormat());
+      ps.setString(6, news.getCountry());
+      ps.setString(7, news.getPlaylist());
+      ps.setString(8, news.getDownloadURL());
+      ps.setString(9, news.getImageURL());
+      ps.execute();
+    } catch (SQLException e) {
+      logger.error(e, e);
+    } finally {
+      if (ps != null) {
         try {
-          ps2.close();
+          ps.close();
         } catch (SQLException e) {
           logger.error(e, e);
         }
       }
     }
-    return false;
   }
 
 

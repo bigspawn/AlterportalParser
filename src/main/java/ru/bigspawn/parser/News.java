@@ -190,7 +190,7 @@ public class News {
         ", genre='" + genre + '\'' +
         ", format='" + format + '\'' +
         ", country='" + country + '\'' +
-        ", playlist='" + playlist + '\'' +
+        ", playlist='" + playlist.replace('\n', ',') + '\'' +
         ", downloadURL='" + downloadURL + '\'' +
         ", imageURL='" + imageURL + '\'' +
         '}';
