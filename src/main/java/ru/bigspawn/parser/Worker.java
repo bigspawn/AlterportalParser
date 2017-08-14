@@ -130,13 +130,13 @@ public class Worker implements Runnable {
                   news.setDownloadURL(getHref(aElements));
                 }
                 news.setDateTime(getDateTime(newsElement));
-                newsCounter++;
                 if (!ifNewsAlreadyPosted(news)) {
                   insetNewsToDatabase(news);
                   sendNewsToChannel(news);
                   logger.info("Sleep 10 seconds");
                   TimeUnit.SECONDS.sleep(10);
                 } else {
+                  newsCounter++;
                   key = pageNumber != 1 || newsCounter >= MAX_REPEAT_NEWS;
                   logger.info("Are we still in a first page? - " + !key + " - And count is " + newsCounter);
                   if (key) {
