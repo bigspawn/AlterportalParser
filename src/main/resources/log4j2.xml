@@ -5,15 +5,20 @@
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
 
-    <File name="MyFile" fileName="logs/app.log">
-      <PatternLayout pattern="%d{yyyy-mm-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-    </File>
+    <RollingFile fileName="logs/app.log" filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz"
+      name="RollingFile">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="250 MB"/>
+      </Policies>
+    </RollingFile>
   </appenders>
 
   <loggers>
     <root level="debug">
-      <appender-ref ref="Console" level="info"/>
-      <appender-ref ref="MyFile" level="all"/>
+      <appender-ref level="all" ref="Console"/>
+      <AppenderRef level="all" ref="RollingFile"/>
     </root>
   </loggers>
 </configuration>
