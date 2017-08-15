@@ -2,8 +2,6 @@ package ru.bigspawn.parser.bot;
 
 import static ru.bigspawn.parser.Main.logger;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Update;
@@ -15,7 +13,7 @@ import ru.bigspawn.parser.News;
 /**
  * Created by bigspawn on 15.06.2017.
  */
-public class MyBot extends TelegramLongPollingBot {
+public class Bot extends TelegramLongPollingBot {
 
   public void sendNewsToChanel(News news, String chatId) throws Exception {
     if (news.getImageURL() != null) {
@@ -60,11 +58,11 @@ public class MyBot extends TelegramLongPollingBot {
 
   @Override
   public String getBotUsername() {
-    return Configs.getInstance().getTELEGRAM_BOT_NAME();
+    return Configs.getInstance().getTelegramBotName();
   }
 
   @Override
   public String getBotToken() {
-    return Configs.getInstance().getTELEGRAM_BOT();
+    return Configs.getInstance().getTelegramBot();
   }
 }

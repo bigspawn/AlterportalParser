@@ -2,5 +2,4 @@
 *.iml
 logs/
 settings.ini
-src/test/
 target/

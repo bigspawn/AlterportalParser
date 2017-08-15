@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import ru.bigspawn.parser.bot.MyBot;
+import ru.bigspawn.parser.bot.Bot;
 
 /**
  * Created by bigspawn on 09.06.2017.
@@ -35,12 +35,12 @@ public class Worker implements Runnable {
 
   public static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
   private static final String INSERT_NEWS =
-      "INSERT INTO news_test "
+      "INSERT INTO news "
           + "(title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
           + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
-  private static final String SELECT_NEWS = "SELECT * FROM news_test WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
+  private static final String SELECT_NEWS = "SELECT * FROM news WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
 
-  private MyBot bot;
+  private Bot bot;
   private WebClient client = new WebClient();
   private int pageNumber = 1;
   private String url;
@@ -49,7 +49,7 @@ public class Worker implements Runnable {
   private static final int MAX_REPEAT_NEWS = 10;
   private int newsCounter;
 
-  public Worker(MyBot bot) throws UnsupportedEncodingException {
+  public Worker(Bot bot) throws UnsupportedEncodingException {
     this.bot = bot;
     this.url = getPageURL();
     setOptions();
@@ -59,18 +59,17 @@ public class Worker implements Runnable {
   private void createConnection() {
     try {
       Class.forName("org.postgresql.Driver");
-      connection = DriverManager
-          .getConnection(
-              "jdbc:postgresql://localhost:15432/alterportal_news",
-              "bigspawn",
-              "52169248");
+      connection = DriverManager.getConnection(
+          Configs.getInstance().getDbUrl(),
+          Configs.getInstance().getDbUser(),
+          Configs.getInstance().getDbPasswd());
     } catch (ClassNotFoundException | SQLException e) {
       logger.error(e, e);
     }
   }
 
   private String getPageURL() throws UnsupportedEncodingException {
-    return Configs.getInstance().getURL()
+    return Configs.getInstance().getUrl()
         + URLEncoder.encode(String.valueOf(pageNumber), "UTF-8") + "/";
   }
 
@@ -87,7 +86,7 @@ public class Worker implements Runnable {
         HtmlPage page = client.getPage(url);
         List<HtmlElement> elements = page
             .getByXPath("//*[@id=\"dle-content\"]/table/tbody/tr/td/table");
-        logger.info("Get " + elements.size() + " news from page № " + pageNumber);
+        logger.info("Get " + elements.size() + " news from page " + pageNumber);
         for (HtmlElement element : elements) {
           List<HtmlElement> titleTds = element.getElementsByAttribute("td", "class", "category");
           if (titleTds != null && !titleTds.isEmpty()) {
@@ -166,8 +165,8 @@ public class Worker implements Runnable {
     newsCounter = 0;
     url = getPageURL();
     key = false;
-    logger.info("Waiting for new news. Sleep 30 minutes");
-    TimeUnit.MINUTES.sleep(30);
+    logger.info("Waiting for new news. Sleep 1 hour");
+    TimeUnit.HOURS.sleep(1);
   }
 
   private ArrayList<String> getNewsAsStringArray(HtmlElement newsBodyHtmlElement) {
@@ -228,7 +227,7 @@ public class Worker implements Runnable {
   private void sendNewsToChannel(News news) {
     try {
       logger.info("Try send news: " + news);
-      bot.sendNewsToChanel(news, Configs.getInstance().getTELEGRAM_CHANEL());
+      bot.sendNewsToChanel(news, Configs.getInstance().getTelegramChanel());
     } catch (Exception e) {
       logger.error(e, e);
     }

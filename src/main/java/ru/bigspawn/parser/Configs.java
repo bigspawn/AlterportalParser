@@ -7,11 +7,14 @@ public class Configs {
 
   private static final Configs instance = new Configs();
 
-  private String URL;
-  private Integer LIST_CAPACITY;
-  private String TELEGRAM_CHANEL;
-  private String TELEGRAM_BOT;
-  private String TELEGRAM_BOT_NAME;
+  private String url;
+  private Integer listCapacity;
+  private String telegramChanel;
+  private String telegramBot;
+  private String telegramBotName;
+  private String dbUrl;
+  private String dbUser;
+  private String dbPasswd;
 
   private Configs() {
   }
@@ -20,43 +23,67 @@ public class Configs {
     return instance;
   }
 
-  public String getURL() {
-    return URL;
+  public String getUrl() {
+    return url;
   }
 
-  public void setURL(String URL) {
-    this.URL = URL;
+  public void setUrl(String url) {
+    this.url = url;
   }
 
-  public Integer getLIST_CAPACITY() {
-    return LIST_CAPACITY;
+  public Integer getListCapacity() {
+    return listCapacity;
   }
 
-  public void setLIST_CAPACITY(Integer LIST_CAPACITY) {
-    this.LIST_CAPACITY = LIST_CAPACITY;
+  public void setListCapacity(Integer listCapacity) {
+    this.listCapacity = listCapacity;
   }
 
-  public String getTELEGRAM_CHANEL() {
-    return TELEGRAM_CHANEL;
+  public String getTelegramChanel() {
+    return telegramChanel;
   }
 
-  public void setTELEGRAM_CHANEL(String TELEGRAM_CHANEL) {
-    this.TELEGRAM_CHANEL = TELEGRAM_CHANEL;
+  public void setTelegramChanel(String telegramChanel) {
+    this.telegramChanel = telegramChanel;
   }
 
-  public String getTELEGRAM_BOT() {
-    return TELEGRAM_BOT;
+  public String getTelegramBot() {
+    return telegramBot;
   }
 
-  public void setTELEGRAM_BOT(String TELEGRAM_BOT) {
-    this.TELEGRAM_BOT = TELEGRAM_BOT;
+  public void setTelegramBot(String telegramBot) {
+    this.telegramBot = telegramBot;
   }
 
-  public String getTELEGRAM_BOT_NAME() {
-    return TELEGRAM_BOT_NAME;
+  public String getTelegramBotName() {
+    return telegramBotName;
   }
 
-  public void setTELEGRAM_BOT_NAME(String TELEGRAM_BOT_NAME) {
-    this.TELEGRAM_BOT_NAME = TELEGRAM_BOT_NAME;
+  public void setTelegramBotName(String telegramBotName) {
+    this.telegramBotName = telegramBotName;
+  }
+
+  public String getDbUrl() {
+    return dbUrl;
+  }
+
+  public void setDbUrl(String dbUrl) {
+    this.dbUrl = dbUrl;
+  }
+
+  public String getDbUser() {
+    return dbUser;
+  }
+
+  public void setDbUser(String dbUser) {
+    this.dbUser = dbUser;
+  }
+
+  public String getDbPasswd() {
+    return dbPasswd;
+  }
+
+  public void setDbPasswd(String dbPasswd) {
+    this.dbPasswd = dbPasswd;
   }
 }
