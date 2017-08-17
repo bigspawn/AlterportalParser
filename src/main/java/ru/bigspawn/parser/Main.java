@@ -34,13 +34,13 @@ public class Main {
   private static void initConfigs() throws IOException {
     Wini wini = new Wini(new File("settings.ini"));
     Configs.getInstance().setUrl(wini.get("Parser", "URL"));
-    Configs.getInstance().setListCapacity(Integer.valueOf(wini.get("Parser", "LIST_CAPACITY")));
     Configs.getInstance().setTelegramBot(wini.get("Bot", "TELEGRAM_BOT"));
     Configs.getInstance().setTelegramBotName(wini.get("Bot", "TELEGRAM_BOT_NAME"));
     Configs.getInstance().setTelegramChanel(wini.get("Bot", "TELEGRAM_CHANEL"));
     Configs.getInstance().setDbUrl(wini.get("Parser", "DB_URL"));
     Configs.getInstance().setDbUser(wini.get("Parser", "DB_User"));
     Configs.getInstance().setDbPasswd(wini.get("Parser", "DB_Passwd"));
+    Configs.getInstance().setDbName(wini.get("Parser", "DB_Name"));
   }
 
   private static void startWorker(Bot bot) throws UnsupportedEncodingException {

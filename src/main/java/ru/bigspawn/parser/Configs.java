@@ -8,13 +8,13 @@ public class Configs {
   private static final Configs instance = new Configs();
 
   private String url;
-  private Integer listCapacity;
   private String telegramChanel;
   private String telegramBot;
   private String telegramBotName;
   private String dbUrl;
   private String dbUser;
   private String dbPasswd;
+  private String dbName;
 
   private Configs() {
   }
@@ -29,14 +29,6 @@ public class Configs {
 
   public void setUrl(String url) {
     this.url = url;
-  }
-
-  public Integer getListCapacity() {
-    return listCapacity;
-  }
-
-  public void setListCapacity(Integer listCapacity) {
-    this.listCapacity = listCapacity;
   }
 
   public String getTelegramChanel() {
@@ -85,5 +77,13 @@ public class Configs {
 
   public void setDbPasswd(String dbPasswd) {
     this.dbPasswd = dbPasswd;
+  }
+
+  public String getDbName() {
+    return dbName;
+  }
+
+  public void setDbName(String dbName) {
+    this.dbName = dbName;
   }
 }

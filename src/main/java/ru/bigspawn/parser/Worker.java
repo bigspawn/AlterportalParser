@@ -35,10 +35,13 @@ public class Worker implements Runnable {
 
   public static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
   private static final String INSERT_NEWS =
-      "INSERT INTO news "
-          + "(title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
-          + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
-  private static final String SELECT_NEWS = "SELECT * FROM news WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
+      " INSERT INTO " + Configs.getInstance().getDbName() +
+          " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
+          +
+          " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
+  private static final String SELECT_NEWS =
+      " SELECT * FROM " + Configs.getInstance().getDbName() +
+          " WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
 
   private Bot bot;
   private WebClient client = new WebClient();
@@ -126,12 +129,14 @@ public class Worker implements Runnable {
                     imageUrl = getImageSrc(newsBodyHtmlElement.getElementsByTagName("img"));
                   }
                   news.setImageURL(imageUrl);
-                  news.setDownloadURL(getHref(aElements));
+                  if (type != NewsType.Concerts && type != NewsType.News) {
+                    news.setDownloadURL(getHref(aElements));
+                  }
                 }
                 news.setDateTime(getDateTime(newsElement));
-                if (!ifNewsAlreadyPosted(news)) {
-                  insetNewsToDatabase(news);
-                  sendNewsToChannel(news);
+                if (!ifAlreadyPosted(news)) {
+                  insetToDatabase(news);
+                  sendToChannel(news);
                   logger.info("Sleep 10 seconds");
                   TimeUnit.SECONDS.sleep(10);
                 } else {
@@ -224,7 +229,7 @@ public class Worker implements Runnable {
     return dateTime;
   }
 
-  private void sendNewsToChannel(News news) {
+  private void sendToChannel(News news) {
     try {
       logger.info("Try send news: " + news);
       bot.sendNewsToChanel(news, Configs.getInstance().getTelegramChanel());
@@ -233,7 +238,7 @@ public class Worker implements Runnable {
     }
   }
 
-  private boolean ifNewsAlreadyPosted(News news) {
+  private boolean ifAlreadyPosted(News news) {
     PreparedStatement ps = null;
     try {
       ps = connection.prepareStatement(SELECT_NEWS);
@@ -258,7 +263,7 @@ public class Worker implements Runnable {
     return false;
   }
 
-  private void insetNewsToDatabase(News news) {
+  private void insetToDatabase(News news) {
     PreparedStatement ps = null;
     try {
       ps = connection.prepareStatement(INSERT_NEWS);

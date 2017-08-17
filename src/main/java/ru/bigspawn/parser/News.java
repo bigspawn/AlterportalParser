@@ -113,19 +113,28 @@ public class News {
   public String getTextForMessage() {
     StringBuilder builder = new StringBuilder();
     builder.append(title).append('\n')
-        .append("Категория: ").append(type).append('\n')
-        .append(genre).append('\n');
-    if (format != null && !format.isEmpty()) {
-      builder.append(format).append('\n');
+        .append("Категория: ").append(type).append('\n');
+    if (type == NewsType.News) {
+      builder.append("\n");
     }
-    if (country != null && !country.isEmpty()) {
-      builder.append(country).append('\n');
-    }
-    builder.append("Дата: ").append(Worker.formatter.print(dateTime)).append('\n')
-        .append("Плейлист: \n")
-        .append(playlist).append('\n')
-        .append(downloadURL);
+    addStringIfNotNullOrEmpty(builder, genre);
+    addStringIfNotNullOrEmpty(builder, format);
+    addStringIfNotNullOrEmpty(builder, country);
+    builder.append("Дата: ").append(Worker.formatter.print(dateTime)).append('\n');
+    addStringIfNotNullOrEmpty(builder, playlist, "Плейлист: \n");
     return builder.toString();
+  }
+
+  private void addStringIfNotNullOrEmpty(StringBuilder builder, String text) {
+    if (text != null && !text.isEmpty()) {
+      builder.append(text).append('\n');
+    }
+  }
+
+  private void addStringIfNotNullOrEmpty(StringBuilder builder, String text, String preText) {
+    if (text != null && !text.isEmpty()) {
+      builder.append(preText).append(text).append('\n');
+    }
   }
 
   @Override

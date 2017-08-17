@@ -2,9 +2,13 @@ package ru.bigspawn.parser.bot;
 
 import static ru.bigspawn.parser.Main.logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.bigspawn.parser.Configs;
@@ -21,7 +25,7 @@ public class Bot extends TelegramLongPollingBot {
     }
     String textForMessage = news.getTextForMessage();
     if (textForMessage != null && !textForMessage.isEmpty()) {
-      sendMessageToChannel(news, chatId);
+      sendMessageToChannel(chatId, news);
     }
   }
 
@@ -36,11 +40,14 @@ public class Bot extends TelegramLongPollingBot {
     }
   }
 
-  private void sendMessageToChannel(News news, String chatId) {
-    SendMessage message = new SendMessage(chatId, news.getTextForMessage());
+  private void sendMessageToChannel(String chatId, News news) {
     try {
-      sendMessage(message);
-      logger.info("Send new news: " + news.getTitle() + "to channel");
+      if (news.getDownloadURL() != null && !news.getDownloadURL().isEmpty()) {
+        sendMessage(sendNewsWithDownloadButton(chatId, news));
+      } else {
+        sendMessage(new SendMessage(chatId, news.getTextForMessage()));
+      }
+      logger.info("Send news: " + news.getTitle() + " to channel");
     } catch (TelegramApiException e) {
       logger.error(e, e);
     }
@@ -64,5 +71,22 @@ public class Bot extends TelegramLongPollingBot {
   @Override
   public String getBotToken() {
     return Configs.getInstance().getTelegramBot();
+  }
+
+  private SendMessage sendNewsWithDownloadButton(String chatId, News news) {
+    InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+    List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+    List<InlineKeyboardButton> row = new ArrayList<>();
+    InlineKeyboardButton button = new InlineKeyboardButton();
+    button.setText("Download");
+    button.setUrl(news.getDownloadURL());
+    row.add(button);
+    rows.add(row);
+    inlineKeyboardMarkup.setKeyboard(rows);
+    SendMessage message = new SendMessage();
+    message.setChatId(chatId);
+    message.setText(news.getTextForMessage());
+    message.setReplyMarkup(inlineKeyboardMarkup);
+    return message;
   }
 }
