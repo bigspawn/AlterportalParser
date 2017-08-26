@@ -86,82 +86,100 @@ public class Worker implements Runnable {
     logger.info("Start worker");
     while (!Thread.currentThread().isInterrupted()) {
       try {
-        HtmlPage page = client.getPage(url);
-        List<HtmlElement> elements = page
-            .getByXPath("//*[@id=\"dle-content\"]/table/tbody/tr/td/table");
-        logger.info("Get " + elements.size() + " news from page " + pageNumber);
-        for (HtmlElement element : elements) {
-          List<HtmlElement> titleTds = element.getElementsByAttribute("td", "class", "category");
-          if (titleTds != null && !titleTds.isEmpty()) {
-            String newsCategory = titleTds.get(0).asText().trim();
-            Optional<NewsType> optional = Arrays.stream(NewsType.values())
-                .filter(x -> newsCategory.equals(x.getName()))
-                .findFirst();
-            if (optional.isPresent()) {
-              NewsType type = optional.get();
-              HtmlElement titleElement = element
-                  .getElementsByAttribute("td", "class", "ntitle")
-                  .get(0);
-              String newsURL = titleElement.getElementsByTagName("a").get(0).getAttribute("href");
-              page = client.getPage(newsURL);
-              List<HtmlElement> newsElements = page.getByXPath("//*[@id=\"dle-content\"]");
-              if (newsElements != null && !newsElements.isEmpty()) {
-                HtmlElement newsElement = newsElements.get(0);
-                News news = new News();
-                news.setType(type);
-                news.setTitle(getNewsTitle(newsElement));
-
-                HtmlElement newsBodyHtmlElement = (HtmlElement) newsElement
-                    .getByXPath("//div[contains(@id, \"news-id\")]").get(0);
-                ArrayList<String> lines = getNewsAsStringArray(newsBodyHtmlElement);
-                news.setGenre(getNewsTag(lines, "Стиль", "Жанр"));
-                if (type != NewsType.Concerts) {
-                  news.setCountry(getNewsTag(lines, "Страна", "Родина"));
-                  news.setFormat(getNewsTag(lines, "Формат", "Качество"));
-                }
-                news.setPlaylist(getTrackList(lines));
-                List<HtmlElement> aElements = newsBodyHtmlElement.getElementsByTagName("a");
-                if (aElements != null && !aElements.isEmpty()) {
-                  String imageUrl = getImageUrl(aElements);
-                  if (imageUrl == null || imageUrl.isEmpty()
-                      || !imageUrl.contains("fastpic")
-                      || !imageUrl.contains("radikal")) {
-                    imageUrl = getImageSrc(newsBodyHtmlElement.getElementsByTagName("img"));
-                  }
-                  news.setImageURL(imageUrl);
-                  if (type != NewsType.Concerts && type != NewsType.News) {
-                    news.setDownloadURL(getHref(aElements));
-                  }
-                }
-                news.setDateTime(getDateTime(newsElement));
-                if (!ifAlreadyPosted(news)) {
-                  insetToDatabase(news);
-                  sendToChannel(news);
-                  logger.info("Sleep 10 seconds");
-                  TimeUnit.SECONDS.sleep(10);
-                } else {
-                  newsCounter++;
-                  key = pageNumber != 1 || newsCounter >= MAX_REPEAT_NEWS;
-                  logger.info("Are we still in a first page? - " + !key + " - And count is " + newsCounter);
-                  if (key) {
-                    break;
-                  }
-                }
-              }
-            }
-          }
-        }
-        if (key) {
-          sleep();
-        } else {
-          pageNumber++;
-          url = getPageURL();
-        }
+        greatMethodDoAllWorld();
+//        googleMusicUrl();
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
       }
     }
     logger.info("Stop worker");
+  }
+
+  private void googleMusicUrl() throws IOException, InterruptedException {
+    String gUrl = "https://play.google.com/store/search?q=";
+    String end = "&c=music";
+    String band = "Cold Black - Circles";
+    HtmlPage page = client.getPage(gUrl + URLEncoder.encode(band) + end);
+    List<HtmlElement> elements = page.getByXPath(
+        "//*[@id=\"body-content\"]/div[2]/div/div[1]/div/div[2]/div/div[2]/div/div/div[2]/a[2]");
+    if (elements != null && !elements.isEmpty()) {
+      System.out.println(Arrays.toString(elements.toArray()));
+    }
+  }
+
+  private void greatMethodDoAllWorld() throws IOException, InterruptedException {
+    HtmlPage page = client.getPage(url);
+    List<HtmlElement> elements = page
+        .getByXPath("//*[@id=\"dle-content\"]/table/tbody/tr/td/table");
+    logger.info("Get " + elements.size() + " news from page " + pageNumber);
+    for (HtmlElement element : elements) {
+      List<HtmlElement> titleTds = element.getElementsByAttribute("td", "class", "category");
+      if (titleTds != null && !titleTds.isEmpty()) {
+        String newsCategory = titleTds.get(0).asText().trim();
+        Optional<NewsType> optional = Arrays.stream(NewsType.values())
+            .filter(x -> newsCategory.equals(x.getName()))
+            .findFirst();
+        if (optional.isPresent()) {
+          NewsType type = optional.get();
+          HtmlElement titleElement = element
+              .getElementsByAttribute("td", "class", "ntitle")
+              .get(0);
+          String newsURL = titleElement.getElementsByTagName("a").get(0).getAttribute("href");
+          page = client.getPage(newsURL);
+          List<HtmlElement> newsElements = page.getByXPath("//*[@id=\"dle-content\"]");
+          if (newsElements != null && !newsElements.isEmpty()) {
+            HtmlElement newsElement = newsElements.get(0);
+            News news = new News();
+            news.setType(type);
+            news.setTitle(getNewsTitle(newsElement));
+
+            HtmlElement newsBodyHtmlElement = (HtmlElement) newsElement
+                .getByXPath("//div[contains(@id, \"news-id\")]").get(0);
+            ArrayList<String> lines = getNewsAsStringArray(newsBodyHtmlElement);
+            news.setGenre(getNewsTag(lines, "Стиль", "Жанр"));
+            if (type != NewsType.Concerts) {
+              news.setCountry(getNewsTag(lines, "Страна", "Родина"));
+              news.setFormat(getNewsTag(lines, "Формат", "Качество"));
+            }
+            news.setPlaylist(getTrackList(lines));
+            List<HtmlElement> aElements = newsBodyHtmlElement.getElementsByTagName("a");
+            if (aElements != null && !aElements.isEmpty()) {
+              String imageUrl = getImageUrl(aElements);
+              if (imageUrl == null || imageUrl.isEmpty()
+                  || !imageUrl.contains("fastpic")
+                  || !imageUrl.contains("radikal")) {
+                imageUrl = getImageSrc(newsBodyHtmlElement.getElementsByTagName("img"));
+              }
+              news.setImageURL(imageUrl);
+              if (type != NewsType.Concerts && type != NewsType.News) {
+                news.setDownloadURL(getHref(aElements));
+              }
+            }
+            news.setDateTime(getDateTime(newsElement));
+            if (!ifAlreadyPosted(news)) {
+              insetToDatabase(news);
+              sendToChannel(news);
+              logger.info("Sleep 10 seconds");
+              TimeUnit.SECONDS.sleep(10);
+            } else {
+              newsCounter++;
+              key = pageNumber != 1 || newsCounter >= MAX_REPEAT_NEWS;
+              logger.info(
+                  "Are we still in a first page? - " + !key + " - And count is " + newsCounter);
+              if (key) {
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    if (key) {
+      sleep();
+    } else {
+      pageNumber++;
+      url = getPageURL();
+    }
   }
 
   private void sleep() throws UnsupportedEncodingException, InterruptedException {
@@ -214,9 +232,9 @@ public class Worker implements Runnable {
         "//*[@id=\"dle-content\"]/table/tbody/tr/td/div[@class=\"slink1\"]");
     if (commentElements != null && !commentElements.isEmpty()) {
       String date = commentElements.get(0).getTextContent().trim();
-      if (StringUtils.contains(date, "Вчера")) {
+      if (StringUtils.containsIgnoreCase(date, "Вчера")) {
         dateTime = dateTime.minusDays(1);
-      } else if (!StringUtils.contains(date, "Сегодня")) {
+      } else if (!StringUtils.containsIgnoreCase(date, "Сегодня")) {
         Pattern pattern = Pattern.compile("\\|\\s.*");
         Matcher matcher = pattern.matcher(date);
         if (matcher.find()) {
@@ -294,8 +312,8 @@ public class Worker implements Runnable {
   private String getTrackList(ArrayList<String> lines) {
     StringBuilder tracks = new StringBuilder("");
     for (int i = 0; i < lines.size(); i++) {
-      if (StringUtils.contains(lines.get(i), "Треклист")
-          || StringUtils.contains(lines.get(i), "Tracklist")) {
+      if (StringUtils.containsIgnoreCase(lines.get(i), "Треклист")
+          || StringUtils.containsIgnoreCase(lines.get(i), "Tracklist")) {
         for (int j = i + 1; j < lines.size(); j++) {
           String track = lines.get(j).trim();
           if (Character.isDigit(track.charAt(0))) {
