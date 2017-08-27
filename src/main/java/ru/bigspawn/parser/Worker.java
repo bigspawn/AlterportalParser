@@ -1,6 +1,5 @@
 package ru.bigspawn.parser;
 
-import static ru.bigspawn.parser.Main.logger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.Logger;
 import ru.bigspawn.parser.bot.Bot;
 
 /**
@@ -29,6 +29,7 @@ public class Worker implements Runnable {
           " WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
 
   private static final int MAX_REPEAT_NEWS = 10;
+  private Logger logger;
 
   private Connection connection;
   private Parser parser;
@@ -39,9 +40,10 @@ public class Worker implements Runnable {
   private String telegramChanel;
 
 
-  public Worker(Parser parser, Bot bot) throws UnsupportedEncodingException {
+  public Worker(Parser parser, Bot bot, Logger logger) throws UnsupportedEncodingException {
     this.parser = parser;
     this.bot = bot;
+    this.logger = logger;
     telegramChanel = Configuration.getInstance().getTelegramChanel();
     createConnection();
   }
@@ -60,7 +62,7 @@ public class Worker implements Runnable {
 
   @Override
   public void run() {
-    logger.info("Start worker");
+    logger.info("Start worker: " + Thread.currentThread().getName());
     while (!Thread.currentThread().isInterrupted()) {
       try {
         List<News> news = parser.parse(pageNumber);
@@ -135,7 +137,7 @@ public class Worker implements Runnable {
     }
   }
 
-  private void sendToChannel(News news) {
+  private synchronized void sendToChannel(News news) {
     try {
       logger.info("Try send news: " + news);
       bot.sendNewsToChanel(news, telegramChanel);

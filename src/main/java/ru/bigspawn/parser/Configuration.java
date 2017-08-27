@@ -1,5 +1,7 @@
 package ru.bigspawn.parser;
 
+import java.util.ArrayList;
+
 /**
  * Created by bigspawn on 09.06.2017.
  */
@@ -7,7 +9,7 @@ public class Configuration {
 
   private static final Configuration instance = new Configuration();
 
-  private String url;
+  private ArrayList<String> urls;
   private String telegramChanel;
   private String telegramBot;
   private String telegramBotName;
@@ -25,12 +27,12 @@ public class Configuration {
     return instance;
   }
 
-  public String getUrl() {
-    return url;
+  public ArrayList<String> getUrls() {
+    return urls;
   }
 
-  public void setUrl(String url) {
-    this.url = url;
+  public void setUrls(ArrayList<String> urls) {
+    this.urls = urls;
   }
 
   public String getTelegramChanel() {

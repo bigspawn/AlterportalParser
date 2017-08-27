@@ -1,7 +1,5 @@
 package ru.bigspawn.parser;
 
-import static ru.bigspawn.parser.Main.logger;
-
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -16,6 +14,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -26,10 +25,13 @@ public class Parser {
 
   private WebClient client;
   private String pageUrl;
+  private Logger logger;
 
-  public Parser(WebClient client, String pageUrl) throws UnsupportedEncodingException {
+  public Parser(WebClient client, String pageUrl, Logger logger)
+      throws UnsupportedEncodingException {
     this.client = client;
     this.pageUrl = pageUrl;
+    this.logger = logger;
     setOptions();
   }
 
@@ -39,8 +41,10 @@ public class Parser {
   }
 
   public List<News> parse(int pageNumber) throws IOException {
+    String pageURL = getPageURL(pageNumber);
+    logger.info("Start parse " + pageURL);
     List<News> newsList = new ArrayList<>();
-    HtmlPage page = client.getPage(getPageURL(pageNumber));
+    HtmlPage page = client.getPage(pageURL);
     List<HtmlElement> elements = page
         .getByXPath("//*[@id=\"dle-content\"]/table/tbody/tr/td/table");
     logger.info("Get " + elements.size() + " news from page " + pageNumber);
@@ -89,6 +93,7 @@ public class Parser {
             }
             news.setDateTime(getDateTime(newsElement));
             newsList.add(news);
+            logger.info("Add new news: " + news);
           }
         }
       }
@@ -116,11 +121,11 @@ public class Parser {
     return replaceColons(formatBuilder.toString());
   }
 
-  private void findNewsTag(ArrayList<String> lines, StringBuilder countryBuilder, String tag) {
-    Optional<String> country = lines.stream()
+  private void findNewsTag(ArrayList<String> lines, StringBuilder builder, String tag) {
+    Optional<String> first = lines.stream()
         .filter(line -> StringUtils.containsIgnoreCase(line, tag))
         .findFirst();
-    country.ifPresent(countryBuilder::append);
+    first.ifPresent(builder::append);
   }
 
   private String getNewsTitle(HtmlElement newsElement) {
