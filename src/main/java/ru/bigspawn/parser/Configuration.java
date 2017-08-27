@@ -17,8 +17,10 @@ public class Configuration {
   private String dbUser;
   private String dbPasswd;
   private String dbName;
+  private String imagePath;
   private int sleepingTime;
   private int sleepingTimeForNews;
+  private int maxRepeatedNews;
 
   private Configuration() {
   }
@@ -105,5 +107,21 @@ public class Configuration {
 
   public void setSleepingTimeForNews(int sleepingTimeForNews) {
     this.sleepingTimeForNews = sleepingTimeForNews;
+  }
+
+  public String getImagePath() {
+    return imagePath;
+  }
+
+  public void setImagePath(String imagePath) {
+    this.imagePath = imagePath;
+  }
+
+  public int getMaxRepeatedNews() {
+    return maxRepeatedNews;
+  }
+
+  public void setMaxRepeatedNews(int maxRepeatedNews) {
+    this.maxRepeatedNews = maxRepeatedNews;
   }
 }

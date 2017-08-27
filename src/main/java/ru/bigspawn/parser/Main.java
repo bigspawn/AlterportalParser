@@ -25,6 +25,7 @@ public class Main {
   public static final Logger logger = LogManager.getLogger("main");
 
   public static void main(String[] args) {
+    // TODO: 27.08.2017 исправить логирование - все пишется в каждый лог!
     try {
       initConfigs();
       ApiContextInitializer.init();
@@ -34,7 +35,7 @@ public class Main {
       List<String> urls = Configuration.getInstance().getUrls();
       for (String url : urls) {
         startWorker(bot, url);
-        TimeUnit.SECONDS.sleep(30);
+        TimeUnit.SECONDS.sleep(10);
       }
     } catch (IOException | TelegramApiRequestException | InterruptedException e) {
       logger.error(e, e);
@@ -55,10 +56,13 @@ public class Main {
     Configuration.getInstance().setDbUser(ini.get("Parser", "DB_User"));
     Configuration.getInstance().setDbPasswd(ini.get("Parser", "DB_Passwd"));
     Configuration.getInstance().setDbName(ini.get("Parser", "DB_Name"));
+    Configuration.getInstance().setImagePath(ini.get("Parser", "Images_Path"));
     Configuration.getInstance()
         .setSleepingTime(Integer.parseInt(ini.get("Parser", "Sleeping_Time")));
     Configuration.getInstance()
         .setSleepingTimeForNews(Integer.parseInt(ini.get("Parser", "Sleeping_Time_For_News")));
+    Configuration.getInstance()
+        .setMaxRepeatedNews(Integer.parseInt(ini.get("Parser", "Max_Repeated_News")));
   }
 
   private static void setIniConfigurations(Ini ini) {

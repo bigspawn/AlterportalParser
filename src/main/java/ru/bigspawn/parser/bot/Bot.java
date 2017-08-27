@@ -30,13 +30,15 @@ public class Bot extends TelegramLongPollingBot {
   }
 
   private void sendPhotoIntoChannel(News news, String chatId) {
+    String imageURL = news.getImageURL();
     SendPhoto sendPhotoRequest = new SendPhoto();
     sendPhotoRequest.setChatId(chatId);
-    sendPhotoRequest.setPhoto(news.getImageURL());
+    sendPhotoRequest.setPhoto(imageURL);
     try {
       sendPhoto(sendPhotoRequest);
     } catch (TelegramApiException e) {
       logger.error(e, e);
+      //todo как то вытаскивать картинки
     }
   }
 

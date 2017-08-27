@@ -28,9 +28,7 @@ public class Worker implements Runnable {
       " SELECT * FROM " + Configuration.getInstance().getDbName() +
           " WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
 
-  private static final int MAX_REPEAT_NEWS = 10;
   private Logger logger;
-
   private Connection connection;
   private Parser parser;
   private Bot bot;
@@ -38,13 +36,14 @@ public class Worker implements Runnable {
   private int pageNumber = 1;
   private boolean key;
   private String telegramChanel;
-
+  private int maxRepeatedNews;
 
   public Worker(Parser parser, Bot bot, Logger logger) throws UnsupportedEncodingException {
     this.parser = parser;
     this.bot = bot;
     this.logger = logger;
     telegramChanel = Configuration.getInstance().getTelegramChanel();
+    maxRepeatedNews = Configuration.getInstance().getMaxRepeatedNews();
     createConnection();
   }
 
@@ -75,7 +74,7 @@ public class Worker implements Runnable {
             TimeUnit.SECONDS.sleep(sleepingTimeForNews);
           } else {
             newsCounter++;
-            key = pageNumber != 1 || newsCounter >= MAX_REPEAT_NEWS;
+            key = pageNumber != 1 || newsCounter >= maxRepeatedNews;
             logger.info("Are we still in a first page? - " + !key
                 + " - And count is " + newsCounter);
             if (key) {
