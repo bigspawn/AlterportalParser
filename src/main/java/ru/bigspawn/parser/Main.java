@@ -1,5 +1,6 @@
 package ru.bigspawn.parser;
 
+import com.gargoylesoftware.htmlunit.WebClient;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -25,7 +26,7 @@ public class Main {
       TelegramBotsApi botsApi = new TelegramBotsApi();
       Bot bot = new Bot();
       botsApi.registerBot(bot);
-      startWorker(bot);
+      startWorker(bot, Configuration.getInstance().getUrl());
     } catch (IOException | TelegramApiRequestException e) {
       logger.error(e, e);
     }
@@ -33,18 +34,23 @@ public class Main {
 
   private static void initConfigs() throws IOException {
     Wini wini = new Wini(new File("settings.ini"));
-    Configs.getInstance().setUrl(wini.get("Parser", "URL"));
-    Configs.getInstance().setTelegramBot(wini.get("Bot", "TELEGRAM_BOT"));
-    Configs.getInstance().setTelegramBotName(wini.get("Bot", "TELEGRAM_BOT_NAME"));
-    Configs.getInstance().setTelegramChanel(wini.get("Bot", "TELEGRAM_CHANEL"));
-    Configs.getInstance().setDbUrl(wini.get("Parser", "DB_URL"));
-    Configs.getInstance().setDbUser(wini.get("Parser", "DB_User"));
-    Configs.getInstance().setDbPasswd(wini.get("Parser", "DB_Passwd"));
-    Configs.getInstance().setDbName(wini.get("Parser", "DB_Name"));
+    Configuration.getInstance().setUrl(wini.get("Parser", "URL"));
+    Configuration.getInstance().setTelegramBot(wini.get("Bot", "TELEGRAM_BOT"));
+    Configuration.getInstance().setTelegramBotName(wini.get("Bot", "TELEGRAM_BOT_NAME"));
+    Configuration.getInstance().setTelegramChanel(wini.get("Bot", "TELEGRAM_CHANEL"));
+    Configuration.getInstance().setDbUrl(wini.get("Parser", "DB_URL"));
+    Configuration.getInstance().setDbUser(wini.get("Parser", "DB_User"));
+    Configuration.getInstance().setDbPasswd(wini.get("Parser", "DB_Passwd"));
+    Configuration.getInstance().setDbName(wini.get("Parser", "DB_Name"));
+    Configuration.getInstance()
+        .setSleepingTime(Integer.parseInt(wini.get("Parser", "Sleeping_Time")));
+    Configuration.getInstance()
+        .setSleepingTimeForNews(Integer.parseInt(wini.get("Parser", "Sleeping_Time_For_News")));
   }
 
-  private static void startWorker(Bot bot) throws UnsupportedEncodingException {
-    Worker worker = new Worker(bot);
+  private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {
+    Parser parser = new Parser(new WebClient(), url);
+    Worker worker = new Worker(parser, bot);
     Thread thread = new Thread(worker);
     thread.start();
   }

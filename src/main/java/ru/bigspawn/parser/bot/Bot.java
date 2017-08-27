@@ -11,7 +11,7 @@ import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import ru.bigspawn.parser.Configs;
+import ru.bigspawn.parser.Configuration;
 import ru.bigspawn.parser.News;
 
 /**
@@ -65,12 +65,12 @@ public class Bot extends TelegramLongPollingBot {
 
   @Override
   public String getBotUsername() {
-    return Configs.getInstance().getTelegramBotName();
+    return Configuration.getInstance().getTelegramBotName();
   }
 
   @Override
   public String getBotToken() {
-    return Configs.getInstance().getTelegramBot();
+    return Configuration.getInstance().getTelegramBot();
   }
 
   private SendMessage sendNewsWithDownloadButton(String chatId, News news) {

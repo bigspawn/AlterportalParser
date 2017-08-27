@@ -120,7 +120,7 @@ public class News {
     addStringIfNotNullOrEmpty(builder, genre);
     addStringIfNotNullOrEmpty(builder, format);
     addStringIfNotNullOrEmpty(builder, country);
-    builder.append("Дата: ").append(Worker.formatter.print(dateTime)).append('\n');
+    builder.append("Дата: ").append(Parser.formatter.print(dateTime)).append('\n');
     addStringIfNotNullOrEmpty(builder, playlist, "Плейлист: \n");
     return builder.toString();
   }

@@ -3,9 +3,9 @@ package ru.bigspawn.parser;
 /**
  * Created by bigspawn on 09.06.2017.
  */
-public class Configs {
+public class Configuration {
 
-  private static final Configs instance = new Configs();
+  private static final Configuration instance = new Configuration();
 
   private String url;
   private String telegramChanel;
@@ -15,11 +15,13 @@ public class Configs {
   private String dbUser;
   private String dbPasswd;
   private String dbName;
+  private int sleepingTime;
+  private int sleepingTimeForNews;
 
-  private Configs() {
+  private Configuration() {
   }
 
-  public static Configs getInstance() {
+  public static Configuration getInstance() {
     return instance;
   }
 
@@ -85,5 +87,21 @@ public class Configs {
 
   public void setDbName(String dbName) {
     this.dbName = dbName;
+  }
+
+  public int getSleepingTime() {
+    return sleepingTime;
+  }
+
+  public void setSleepingTime(int sleepingTime) {
+    this.sleepingTime = sleepingTime;
+  }
+
+  public int getSleepingTimeForNews() {
+    return sleepingTimeForNews;
+  }
+
+  public void setSleepingTimeForNews(int sleepingTimeForNews) {
+    this.sleepingTimeForNews = sleepingTimeForNews;
   }
 }
