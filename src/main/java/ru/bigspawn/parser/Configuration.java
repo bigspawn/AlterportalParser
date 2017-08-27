@@ -1,12 +1,22 @@
 package ru.bigspawn.parser;
 
+import static ru.bigspawn.parser.Main.logger;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import org.ini4j.Config;
+import org.ini4j.Ini;
 
 /**
  * Created by bigspawn on 09.06.2017.
  */
 public class Configuration {
 
+  private static final String SELECTION_URL = "URL";
+  private static final String SECTION_BOT = "Bot";
+  private static final String SECTION_PARSER = "Parser";
   private static final Configuration instance = new Configuration();
 
   private ArrayList<String> urls;
@@ -23,6 +33,39 @@ public class Configuration {
   private int maxRepeatedNews;
 
   private Configuration() {
+    try {
+      initConfigs();
+    } catch (IOException e) {
+      logger.error(e, e);
+    }
+  }
+
+  private static void setIniConfigurations(Ini ini) {
+    Config conf = new Config();
+    conf.setMultiOption(true);
+    ini.setConfig(conf);
+  }
+
+  private void initConfigs() throws IOException {
+    Ini ini = new Ini(new File("settings.ini"));
+    setIniConfigurations(ini);
+    Ini.Section section = ini.get(SELECTION_URL);
+    String[] pagesStr = section.getAll("PAGE", String[].class);
+    ArrayList<String> pages = new ArrayList<>(Arrays.asList(pagesStr));
+    setUrls(pages);
+    setTelegramBot(ini.get(SECTION_BOT, "TELEGRAM_BOT"));
+    setTelegramBotName(ini.get(SECTION_BOT, "TELEGRAM_BOT_NAME"));
+    setTelegramChanel(ini.get(SECTION_BOT, "TELEGRAM_CHANEL"));
+    setDbUrl(ini.get(SECTION_PARSER, "DB_URL"));
+    setDbUser(ini.get(SECTION_PARSER, "DB_USER"));
+    setDbPasswd(ini.get(SECTION_PARSER, "DB_PASSWD"));
+    setDbName(ini.get(SECTION_PARSER, "DB_NAME"));
+    setImagePath(ini.get(SECTION_PARSER, "IMAGES_PATH"));
+    setSleepingTime(Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME")));
+    setSleepingTimeForNews(
+        Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME_FOR_NEWS")));
+    setMaxRepeatedNews(Integer.parseInt(ini.get(SECTION_PARSER, "MAX_REPEATED_NEWS")));
+    logger.info("Init configurations " + this);
   }
 
   public static Configuration getInstance() {
