@@ -19,7 +19,7 @@ import ru.bigspawn.parser.News;
  */
 public class Bot extends TelegramLongPollingBot {
 
-  public void sendNewsToChanel(News news, String chatId) throws Exception {
+  public synchronized void sendNewsToChanel(News news, String chatId) throws Exception {
     if (news.getImageURL() != null) {
       sendPhotoIntoChannel(news, chatId);
     }

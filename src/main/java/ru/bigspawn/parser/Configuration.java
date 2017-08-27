@@ -124,4 +124,22 @@ public class Configuration {
   public void setMaxRepeatedNews(int maxRepeatedNews) {
     this.maxRepeatedNews = maxRepeatedNews;
   }
+
+  @Override
+  public String toString() {
+    return "Configuration{" +
+        "urls=" + urls +
+        ", telegramChanel='" + telegramChanel + '\'' +
+        ", telegramBot='" + telegramBot + '\'' +
+        ", telegramBotName='" + telegramBotName + '\'' +
+        ", dbUrl='" + dbUrl + '\'' +
+        ", dbUser='" + dbUser + '\'' +
+        ", dbPasswd='" + dbPasswd + '\'' +
+        ", dbName='" + dbName + '\'' +
+        ", imagePath='" + imagePath + '\'' +
+        ", sleepingTime=" + sleepingTime +
+        ", sleepingTimeForNews=" + sleepingTimeForNews +
+        ", maxRepeatedNews=" + maxRepeatedNews +
+        '}';
+  }
 }

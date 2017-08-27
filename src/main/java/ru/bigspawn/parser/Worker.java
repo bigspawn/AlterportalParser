@@ -75,8 +75,6 @@ public class Worker implements Runnable {
           } else {
             newsCounter++;
             key = pageNumber != 1 || newsCounter >= maxRepeatedNews;
-            logger.info("Are we still in a first page? - " + !key
-                + " - And count is " + newsCounter);
             if (key) {
               break;
             }
@@ -95,7 +93,7 @@ public class Worker implements Runnable {
   }
 
   private void sleep() throws UnsupportedEncodingException, InterruptedException {
-    logger.info("All news repeated on page: " + pageNumber);
+    logger.info("All news on page: " + pageNumber + " was repeated!");
     pageNumber = 1;
     newsCounter = 0;
     key = false;

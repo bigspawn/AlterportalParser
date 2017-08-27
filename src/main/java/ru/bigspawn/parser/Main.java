@@ -22,21 +22,21 @@ import ru.bigspawn.parser.bot.Bot;
  */
 public class Main {
 
-  public static final Logger logger = LogManager.getLogger("main");
+  public static final Logger logger = LogManager.getLogger(Main.class.getName());
+  private static final String SELECTION_URL = "URL";
+  private static final String SECTION_BOT = "Bot";
+  private static final String SECTION_PARSER = "Parser";
+  private static Configuration config = Configuration.getInstance();
 
   public static void main(String[] args) {
-    // TODO: 27.08.2017 исправить логирование - все пишется в каждый лог!
     try {
+      logger.info("Start application");
       initConfigs();
       ApiContextInitializer.init();
       TelegramBotsApi botsApi = new TelegramBotsApi();
       Bot bot = new Bot();
       botsApi.registerBot(bot);
-      List<String> urls = Configuration.getInstance().getUrls();
-      for (String url : urls) {
-        startWorker(bot, url);
-        TimeUnit.SECONDS.sleep(10);
-      }
+      startWorkers(bot);
     } catch (IOException | TelegramApiRequestException | InterruptedException e) {
       logger.error(e, e);
     }
@@ -45,30 +45,39 @@ public class Main {
   private static void initConfigs() throws IOException {
     Ini ini = new Ini(new File("settings.ini"));
     setIniConfigurations(ini);
-    Ini.Section section = ini.get("URL");
-    String[] pagesStr = section.getAll("page", String[].class);
+    Ini.Section section = ini.get(SELECTION_URL);
+    String[] pagesStr = section.getAll("PAGE", String[].class);
     ArrayList<String> pages = new ArrayList<>(Arrays.asList(pagesStr));
-    Configuration.getInstance().setUrls(pages);
-    Configuration.getInstance().setTelegramBot(ini.get("Bot", "TELEGRAM_BOT"));
-    Configuration.getInstance().setTelegramBotName(ini.get("Bot", "TELEGRAM_BOT_NAME"));
-    Configuration.getInstance().setTelegramChanel(ini.get("Bot", "TELEGRAM_CHANEL"));
-    Configuration.getInstance().setDbUrl(ini.get("Parser", "DB_URL"));
-    Configuration.getInstance().setDbUser(ini.get("Parser", "DB_User"));
-    Configuration.getInstance().setDbPasswd(ini.get("Parser", "DB_Passwd"));
-    Configuration.getInstance().setDbName(ini.get("Parser", "DB_Name"));
-    Configuration.getInstance().setImagePath(ini.get("Parser", "Images_Path"));
-    Configuration.getInstance()
-        .setSleepingTime(Integer.parseInt(ini.get("Parser", "Sleeping_Time")));
-    Configuration.getInstance()
-        .setSleepingTimeForNews(Integer.parseInt(ini.get("Parser", "Sleeping_Time_For_News")));
-    Configuration.getInstance()
-        .setMaxRepeatedNews(Integer.parseInt(ini.get("Parser", "Max_Repeated_News")));
+    config.setUrls(pages);
+    config.setTelegramBot(ini.get(SECTION_BOT, "TELEGRAM_BOT"));
+    config.setTelegramBotName(ini.get(SECTION_BOT, "TELEGRAM_BOT_NAME"));
+    config.setTelegramChanel(ini.get(SECTION_BOT, "TELEGRAM_CHANEL"));
+    config.setDbUrl(ini.get(SECTION_PARSER, "DB_URL"));
+    config.setDbUser(ini.get(SECTION_PARSER, "DB_USER"));
+    config.setDbPasswd(ini.get(SECTION_PARSER, "DB_PASSWD"));
+    config.setDbName(ini.get(SECTION_PARSER, "DB_NAME"));
+    config.setImagePath(ini.get(SECTION_PARSER, "IMAGES_PATH"));
+    config.setSleepingTime(Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME")));
+    config.setSleepingTimeForNews(
+        Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME_FOR_NEWS")));
+    config.setMaxRepeatedNews(Integer.parseInt(ini.get(SECTION_PARSER, "MAX_REPEATED_NEWS")));
+    logger.info("Init configurations " + config);
   }
 
   private static void setIniConfigurations(Ini ini) {
     Config conf = new Config();
     conf.setMultiOption(true);
     ini.setConfig(conf);
+  }
+
+  private static void startWorkers(Bot bot)
+      throws UnsupportedEncodingException, InterruptedException {
+    List<String> urls = config.getUrls();
+    logger.info("Start workers " + urls.size() + " - " + Arrays.toString(urls.toArray()));
+    for (String url : urls) {
+      startWorker(bot, url);
+      TimeUnit.SECONDS.sleep(1);
+    }
   }
 
   private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {

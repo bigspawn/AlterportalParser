@@ -42,12 +42,11 @@ public class Parser {
 
   public List<News> parse(int pageNumber) throws IOException {
     String pageURL = getPageURL(pageNumber);
-    logger.info("Start parse " + pageURL);
+    logger.info("Start parsing news from " + pageURL);
     List<News> newsList = new ArrayList<>();
     HtmlPage page = client.getPage(pageURL);
     List<HtmlElement> elements = page
         .getByXPath("//*[@id=\"dle-content\"]/table/tbody/tr/td/table");
-    logger.info("Get " + elements.size() + " news from page " + pageNumber);
     for (HtmlElement element : elements) {
       List<HtmlElement> titleTds = element.getElementsByAttribute("td", "class", "category");
       if (titleTds != null && !titleTds.isEmpty()) {
@@ -93,11 +92,13 @@ public class Parser {
             }
             news.setDateTime(getDateTime(newsElement));
             newsList.add(news);
-            logger.info("Add new news: " + news);
           }
         }
       }
     }
+    logger
+        .info("All parsed news (" + newsList.size() + "): `" + Arrays.toString(newsList.toArray()));
+    logger.info("Finish parsing.");
     return newsList;
   }
 

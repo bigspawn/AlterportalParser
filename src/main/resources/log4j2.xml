@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration status="WARN">
-  <appenders>
+<Configuration status="WARN">
+  <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
 
     <RollingFile fileName="logs/app.log"
       filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz"
-      name="main">
+      name="Application">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
@@ -17,7 +17,7 @@
 
     <RollingFile fileName="logs/main.log"
       filePattern="logs/$${date:yyyy-MM}/main-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/page/">
+      name="Main">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
@@ -27,7 +27,7 @@
 
     <RollingFile fileName="logs/alternative.log"
       filePattern="logs/$${date:yyyy-MM}/alternative-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/alternative/page/">
+      name="Alternative">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
@@ -37,17 +37,7 @@
 
     <RollingFile fileName="logs/punk.log"
       filePattern="logs/$${date:yyyy-MM}/punk-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/punk/page/">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-      <Policies>
-        <TimeBasedTriggeringPolicy/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
-      </Policies>
-    </RollingFile>
-
-    <RollingFile fileName="logs/punk.log"
-      filePattern="logs/$${date:yyyy-MM}/punk-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/punk/page/">
+      name="Punk">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
@@ -57,7 +47,7 @@
 
     <RollingFile fileName="logs/emo_hardcore.log"
       filePattern="logs/$${date:yyyy-MM}/emo_hardcore-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/emo_hardcore/page/">
+      name="Emo_hardcore">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
@@ -67,57 +57,48 @@
 
     <RollingFile fileName="logs/metal.log"
       filePattern="logs/$${date:yyyy-MM}/metal-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/metal/page/">
+      name="Metal">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <SizeBasedTriggeringPolicy size="50 MB"/>
       </Policies>
     </RollingFile>
+  </Appenders>
 
-    <RollingFile fileName="logs/industrial.log"
-      filePattern="logs/$${date:yyyy-MM}/industrial-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/industrial/page/">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-      <Policies>
-        <TimeBasedTriggeringPolicy/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
-      </Policies>
-    </RollingFile>
+  <Loggers>
+    <Logger additivity="false" level="debug" name="ru.bigspawn.parser.Main">
+      <AppenderRef ref="Application"/>
+      <AppenderRef ref="Console"/>
+    </Logger>
 
-    <RollingFile fileName="logs/rock.log"
-      filePattern="logs/$${date:yyyy-MM}/rock-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/rock/page/">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-      <Policies>
-        <TimeBasedTriggeringPolicy/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
-      </Policies>
-    </RollingFile>
+    <Logger additivity="false" level="debug" name="http://alterportal.ru/page/">
+      <AppenderRef ref="Main"/>
+      <AppenderRef ref="Console"/>
+    </Logger>
 
-    <RollingFile fileName="logs/experimental.log"
-      filePattern="logs/$${date:yyyy-MM}/experimental-%d{MM-dd-yyyy}-%i.log.gz"
-      name="http://alterportal.ru/experimental/page/">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-      <Policies>
-        <TimeBasedTriggeringPolicy/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
-      </Policies>
-    </RollingFile>
+    <Logger additivity="false" level="debug" name="http://alterportal.ru/alternative/page/">
+      <AppenderRef ref="Alternative"/>
+      <AppenderRef ref="Console"/>
+    </Logger>
 
-  </appenders>
-  <loggers>
-    <root level="debug">
-      <appender-ref level="all" ref="Console"/>
-      <AppenderRef level="all" ref="main"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/page/"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/alternative/page/"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/punk/page/"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/emo_hardcore/page/"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/metal/page/"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/industrial/page/"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/rock/page/"/>
-      <AppenderRef level="all" ref="http://alterportal.ru/experimental/page/"/>
-    </root>
-  </loggers>
-</configuration>
+    <Logger additivity="false" level="debug" name="http://alterportal.ru/punk/page/">
+      <AppenderRef ref="Punk"/>
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Logger additivity="false" level="debug" name="http://alterportal.ru/emo_hardcore/page/">
+      <AppenderRef ref="Emo_hardcore"/>
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Logger additivity="false" level="debug" name="http://alterportal.ru/metal/page/">
+      <AppenderRef ref="Metal"/>
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Root level="all">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>
