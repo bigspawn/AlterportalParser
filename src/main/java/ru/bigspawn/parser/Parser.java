@@ -119,7 +119,7 @@ public class Parser {
     if (formatBuilder.length() == 0) {
       findNewsTag(lines, formatBuilder, secondTag);
     }
-    return replaceColons(formatBuilder.toString());
+    return replaceUnnecessarySymbols(formatBuilder.toString());
   }
 
   private void findNewsTag(ArrayList<String> lines, StringBuilder builder, String tag) {
@@ -135,8 +135,11 @@ public class Parser {
         .getTextContent();
   }
 
-  private String replaceColons(String str) {
-    return str.replace(":: ::", ":").replace("::", "").trim();
+  private String replaceUnnecessarySymbols(String str) {
+    return str.replaceAll(":: ::", ":")
+        .replaceAll("::", "")
+        .replace(". Кач-во", "")
+        .trim();
   }
 
   private DateTime getDateTime(HtmlElement newsElement) {
