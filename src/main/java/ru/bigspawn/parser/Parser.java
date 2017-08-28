@@ -60,6 +60,7 @@ public class Parser {
               .getElementsByAttribute("td", "class", "ntitle")
               .get(0);
           String newsURL = titleElement.getElementsByTagName("a").get(0).getAttribute("href");
+          logger.info("News url: " + newsURL);
           page = client.getPage(newsURL);
           List<HtmlElement> newsElements = page.getByXPath("//*[@id=\"dle-content\"]");
           if (newsElements != null && !newsElements.isEmpty()) {
@@ -96,8 +97,8 @@ public class Parser {
         }
       }
     }
-    logger
-        .info("All parsed news (" + newsList.size() + "): `" + Arrays.toString(newsList.toArray()));
+//    logger
+//        .info("All parsed news (" + newsList.size() + "): `" + Arrays.toString(newsList.toArray()));
     logger.info("Finish parsing.");
     return newsList;
   }

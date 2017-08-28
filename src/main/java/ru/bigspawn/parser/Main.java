@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.telegram.telegrambots.ApiContextInitializer;
@@ -39,15 +41,24 @@ public class Main {
     logger.info("Start workers " + urls.size() + " - " + Arrays.toString(urls.toArray()));
     for (String url : urls) {
       startWorker(bot, url);
-      TimeUnit.SECONDS.sleep(1);
+      TimeUnit.SECONDS.sleep(5);
     }
   }
 
   private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {
-    Logger logger = LogManager.getLogger(url);
+    Logger logger = LogManager.getLogger(getNameFromUrl(url));
     Parser parser = new Parser(new WebClient(), url, logger);
     Worker worker = new Worker(parser, bot, logger);
-    Thread thread = new Thread(worker, "Thread: " + url);
+    Thread thread = new Thread(worker, "Thread: " + getNameFromUrl(url));
     thread.start();
+  }
+
+  private static String getNameFromUrl(String url) {
+    Pattern pattern = Pattern.compile("/(\\w+)/");
+    Matcher matcher = pattern.matcher(url);
+    if (matcher.find()) {
+      return matcher.group().replaceAll("/", "");
+    }
+    return url;
   }
 }
