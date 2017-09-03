@@ -14,6 +14,7 @@ import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import ru.bigspawn.parser.bot.Bot;
+import ru.bigspawn.parser.parser.AlterPortalParser;
 
 /**
  * Created by bigspawn on 30.05.2017.
@@ -47,8 +48,8 @@ public class Main {
 
   private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {
     Logger logger = LogManager.getLogger(getNameFromUrl(url));
-    Parser parser = new Parser(new WebClient(), url, logger);
-    Worker worker = new Worker(parser, bot, logger);
+    AlterPortalParser alterPortalParser = new AlterPortalParser(new WebClient(), url, logger);
+    Worker worker = new Worker(alterPortalParser, bot, logger);
     Thread thread = new Thread(worker, "Thread: " + getNameFromUrl(url));
     thread.start();
   }

@@ -1,4 +1,4 @@
-package ru.bigspawn.parser;
+package ru.bigspawn.parser.entity;
 
 /**
  * Created by bigspawn on 31.05.2017.

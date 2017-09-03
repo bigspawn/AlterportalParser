@@ -1,4 +1,4 @@
-package ru.bigspawn.parser;
+package ru.bigspawn.parser.parser;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -16,18 +16,17 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import ru.bigspawn.parser.Constant;
+import ru.bigspawn.parser.entity.News;
+import ru.bigspawn.parser.entity.NewsType;
 
-public class Parser {
-
-  static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
+public class AlterPortalParser implements Parser {
 
   private WebClient client;
   private String pageUrl;
   private Logger logger;
 
-  public Parser(WebClient client, String pageUrl, Logger logger)
+  public AlterPortalParser(WebClient client, String pageUrl, Logger logger)
       throws UnsupportedEncodingException {
     this.client = client;
     this.pageUrl = pageUrl;
@@ -40,6 +39,7 @@ public class Parser {
     client.getOptions().setJavaScriptEnabled(false);
   }
 
+  @Override
   public List<News> parse(int pageNumber) throws IOException {
     String pageURL = getPageURL(pageNumber);
     logger.info("Start parsing news from " + pageURL);
@@ -97,8 +97,6 @@ public class Parser {
         }
       }
     }
-//    logger
-//        .info("All parsed news (" + newsList.size() + "): `" + Arrays.toString(newsList.toArray()));
     logger.info("Finish parsing.");
     return newsList;
   }
@@ -157,7 +155,7 @@ public class Parser {
         if (matcher.find()) {
           date = matcher.group();
           date = date.replace("|", "").trim();
-          dateTime = formatter.parseDateTime(date);
+          dateTime = Constant.FORMATTER.parseDateTime(date);
         }
       }
     }
@@ -199,7 +197,6 @@ public class Parser {
       }
     }
     return "";
-
   }
 
   private String getHref(List<HtmlElement> elements) {

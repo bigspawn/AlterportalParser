@@ -25,7 +25,7 @@ public class Configuration {
   private String telegramBotName;
   private String dbUrl;
   private String dbUser;
-  private String dbPasswd;
+  private String dbPassword;
   private String dbName;
   private String imagePath;
   private int sleepingTime;
@@ -58,7 +58,7 @@ public class Configuration {
     setTelegramChanel(ini.get(SECTION_BOT, "TELEGRAM_CHANEL"));
     setDbUrl(ini.get(SECTION_PARSER, "DB_URL"));
     setDbUser(ini.get(SECTION_PARSER, "DB_USER"));
-    setDbPasswd(ini.get(SECTION_PARSER, "DB_PASSWD"));
+    setDbPassword(ini.get(SECTION_PARSER, "DB_PASSWD"));
     setDbName(ini.get(SECTION_PARSER, "DB_NAME"));
     setImagePath(ini.get(SECTION_PARSER, "IMAGES_PATH"));
     setSleepingTime(Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME")));
@@ -120,12 +120,12 @@ public class Configuration {
     this.dbUser = dbUser;
   }
 
-  public String getDbPasswd() {
-    return dbPasswd;
+  public String getDbPassword() {
+    return dbPassword;
   }
 
-  public void setDbPasswd(String dbPasswd) {
-    this.dbPasswd = dbPasswd;
+  public void setDbPassword(String dbPassword) {
+    this.dbPassword = dbPassword;
   }
 
   public String getDbName() {
@@ -177,7 +177,7 @@ public class Configuration {
         ", telegramBotName='" + telegramBotName + '\'' +
         ", dbUrl='" + dbUrl + '\'' +
         ", dbUser='" + dbUser + '\'' +
-        ", dbPasswd='" + dbPasswd + '\'' +
+        ", dbPassword='" + dbPassword + '\'' +
         ", dbName='" + dbName + '\'' +
         ", imagePath='" + imagePath + '\'' +
         ", sleepingTime=" + sleepingTime +

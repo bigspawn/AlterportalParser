@@ -1,6 +1,7 @@
-package ru.bigspawn.parser;
+package ru.bigspawn.parser.entity;
 
 import org.joda.time.DateTime;
+import ru.bigspawn.parser.Constant;
 
 /**
  * Created by bigspawn on 30.05.2017.
@@ -120,7 +121,7 @@ public class News {
     addStringIfNotNullOrEmpty(builder, genre);
     addStringIfNotNullOrEmpty(builder, format);
     addStringIfNotNullOrEmpty(builder, country);
-    builder.append("Дата: ").append(Parser.formatter.print(dateTime)).append('\n');
+    builder.append("Дата: ").append(Constant.FORMATTER.print(dateTime)).append('\n');
     addStringIfNotNullOrEmpty(builder, playlist, "Плейлист: \n");
     return builder.toString();
   }
