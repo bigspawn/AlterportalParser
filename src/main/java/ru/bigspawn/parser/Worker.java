@@ -66,25 +66,30 @@ public class Worker implements Runnable {
     while (!Thread.currentThread().isInterrupted()) {
       try {
         List<News> news = parser.parse(pageNumber);
-        for (News article : news) {
-          if (!ifAlreadyPosted(article)) {
-            insetToDatabase(article);
-            sendToChannel(article);
-            int sleepingTimeForNews = Configuration.getInstance().getSleepingTimeForNews();
-            logger.info("Sleep " + sleepingTimeForNews + " seconds");
-            TimeUnit.SECONDS.sleep(sleepingTimeForNews);
-          } else {
-            newsCounter++;
-            key = pageNumber != 1 || newsCounter >= maxRepeatedNews;
-            if (key) {
-              break;
-            }
-          }
-        }
-        if (key) {
+        if (news == null) {
           sleep();
         } else {
-          pageNumber++;
+          for (News article : news) {
+            if (!ifAlreadyPosted(article)) {
+              insetToDatabase(article);
+              sendToChannel(article);
+              int sleepingTimeForNews = Configuration.getInstance().getSleepingTimeForNews();
+              logger.info("Sleep " + sleepingTimeForNews + " seconds");
+              TimeUnit.SECONDS.sleep(sleepingTimeForNews);
+            } else {
+              newsCounter++;
+              key = pageNumber != 1 || newsCounter >= maxRepeatedNews;
+              if (key) {
+                break;
+              }
+            }
+          }
+          if (key) {
+            logger.info("All news on page: " + pageNumber + " was repeated!");
+            sleep();
+          } else {
+            pageNumber++;
+          }
         }
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
@@ -94,7 +99,6 @@ public class Worker implements Runnable {
   }
 
   private void sleep() throws UnsupportedEncodingException, InterruptedException {
-    logger.info("All news on page: " + pageNumber + " was repeated!");
     pageNumber = 1;
     newsCounter = 0;
     key = false;

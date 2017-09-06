@@ -47,6 +47,10 @@ public class AlterPortalParser implements Parser {
     logger.info("Start parsing news from " + pageURL);
     List<News> newsList = new ArrayList<>();
     HtmlPage page = client.getPage(pageURL);
+    if (page.getBaseURL().getFile().contains("cgi-sys/suspendedpage.cgi")) {
+      logger.error("Alterportal is unavailable! Page: " + page.getBaseURL());
+      return null;
+    }
     List<HtmlElement> elements = page
         .getByXPath("//*[@id=\"dle-content\"]/table/tbody/tr/td/table");
     for (HtmlElement element : elements) {
