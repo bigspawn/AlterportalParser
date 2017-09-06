@@ -72,27 +72,27 @@
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="http://alterportal.ru/page/">
+    <Logger additivity="false" level="debug" name="page">
       <AppenderRef ref="Main"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="http://alterportal.ru/alternative/page/">
+    <Logger additivity="false" level="debug" name="alternative">
       <AppenderRef ref="Alternative"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="http://alterportal.ru/punk/page/">
+    <Logger additivity="false" level="debug" name="punk">
       <AppenderRef ref="Punk"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="http://alterportal.ru/emo_hardcore/page/">
+    <Logger additivity="false" level="debug" name="emo_hardcore">
       <AppenderRef ref="Emo_hardcore"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="http://alterportal.ru/metal/page/">
+    <Logger additivity="false" level="debug" name="metal">
       <AppenderRef ref="Metal"/>
       <AppenderRef ref="Console"/>
     </Logger>

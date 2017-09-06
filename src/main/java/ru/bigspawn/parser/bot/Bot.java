@@ -12,7 +12,7 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboar
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.bigspawn.parser.Configuration;
-import ru.bigspawn.parser.News;
+import ru.bigspawn.parser.entity.News;
 
 /**
  * Created by bigspawn on 15.06.2017.

@@ -1,4 +1,4 @@
-package ru.bigspawn.parser;
+package ru.bigspawn.parser.entity;
 
 /**
  * Created by bigspawn on 31.05.2017.
@@ -25,10 +25,6 @@ public enum NewsType {
 
   public String getName() {
     return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   @Override

@@ -11,37 +11,38 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.bigspawn.parser.bot.Bot;
+import ru.bigspawn.parser.entity.News;
+import ru.bigspawn.parser.parser.Parser;
 
 /**
  * Created by bigspawn on 09.06.2017.
  */
 public class Worker implements Runnable {
 
-  private static final String INSERT_NEWS =
-      " INSERT INTO " + Configuration.getInstance().getDbName() +
-          " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
-          +
-          " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
   private static final String SELECT_NEWS =
-      " SELECT * FROM " + Configuration.getInstance().getDbName() +
-          " WHERE title = ? AND id_news_type = (SELECT id_news_type FROM news_type WHERE name = ?)";
+      "SELECT * FROM " + Configuration.getInstance().getDbName() + " WHERE title = ?";
+  private static final String INSERT_NEWS =
+      " INSERT INTO " + Configuration.getInstance().getDbName()
+          + " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url)"
+          + " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
 
-  private Logger logger;
-  private Connection connection;
   private Parser parser;
   private Bot bot;
+  private Logger logger;
+  private Connection connection;
+  private String telegramChanel;
   private int newsCounter;
   private int pageNumber = 1;
-  private boolean key;
-  private String telegramChanel;
   private int maxRepeatedNews;
+  private boolean key;
 
-  public Worker(Parser parser, Bot bot, Logger logger) throws UnsupportedEncodingException {
+  public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
     this.parser = parser;
     this.bot = bot;
-    this.logger = logger;
+    this.logger = LogManager.getLogger(loggerName);
     telegramChanel = Configuration.getInstance().getTelegramChanel();
     maxRepeatedNews = Configuration.getInstance().getMaxRepeatedNews();
     createConnection();
@@ -53,7 +54,7 @@ public class Worker implements Runnable {
       connection = DriverManager.getConnection(
           Configuration.getInstance().getDbUrl(),
           Configuration.getInstance().getDbUser(),
-          Configuration.getInstance().getDbPasswd());
+          Configuration.getInstance().getDbPassword());
     } catch (ClassNotFoundException | SQLException e) {
       logger.error(e, e);
     }
@@ -105,7 +106,6 @@ public class Worker implements Runnable {
   private boolean ifAlreadyPosted(News news) {
     try (PreparedStatement ps = connection.prepareStatement(SELECT_NEWS)) {
       ps.setString(1, news.getTitle());
-      ps.setString(2, news.getType().getName());
       ResultSet rs = ps.executeQuery();
       if (rs.next()) {
         logger.info("News '" + news.getTitle() + "' is already posted!");

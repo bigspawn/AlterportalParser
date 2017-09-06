@@ -1,10 +1,16 @@
 package ru.bigspawn.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class Constant {
 
-  public static ArrayList<String> DOWNLOAD_RESOURCES = new ArrayList<String>() {
+  public static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("dd MMMM yyyy");
+  public static final List<String> DOWNLOAD_RESOURCES = Collections
+      .unmodifiableList(new ArrayList<String>() {
     {
       add("mail.ru");
       add("yadi.sk");
@@ -18,5 +24,5 @@ public class Constant {
       add("firedrive.com");
       add("my-files.ru");
     }
-  };
+      });
 }

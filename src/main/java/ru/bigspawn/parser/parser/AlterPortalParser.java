@@ -1,4 +1,4 @@
-package ru.bigspawn.parser;
+package ru.bigspawn.parser.parser;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -14,24 +14,25 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import ru.bigspawn.parser.Constant;
+import ru.bigspawn.parser.Utils;
+import ru.bigspawn.parser.entity.News;
+import ru.bigspawn.parser.entity.NewsType;
 
-public class Parser {
-
-  static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
+public class AlterPortalParser implements Parser {
 
   private WebClient client;
   private String pageUrl;
   private Logger logger;
 
-  public Parser(WebClient client, String pageUrl, Logger logger)
+  public AlterPortalParser(WebClient client, String pageUrl)
       throws UnsupportedEncodingException {
     this.client = client;
     this.pageUrl = pageUrl;
-    this.logger = logger;
+    this.logger = LogManager.getLogger(Utils.getLoggerNameFromUrl(pageUrl));
     setOptions();
   }
 
@@ -40,6 +41,7 @@ public class Parser {
     client.getOptions().setJavaScriptEnabled(false);
   }
 
+  @Override
   public List<News> parse(int pageNumber) throws IOException {
     String pageURL = getPageURL(pageNumber);
     logger.info("Start parsing news from " + pageURL);
@@ -60,6 +62,7 @@ public class Parser {
               .getElementsByAttribute("td", "class", "ntitle")
               .get(0);
           String newsURL = titleElement.getElementsByTagName("a").get(0).getAttribute("href");
+          logger.info("News url: " + newsURL);
           page = client.getPage(newsURL);
           List<HtmlElement> newsElements = page.getByXPath("//*[@id=\"dle-content\"]");
           if (newsElements != null && !newsElements.isEmpty()) {
@@ -96,8 +99,6 @@ public class Parser {
         }
       }
     }
-    logger
-        .info("All parsed news (" + newsList.size() + "): `" + Arrays.toString(newsList.toArray()));
     logger.info("Finish parsing.");
     return newsList;
   }
@@ -119,7 +120,7 @@ public class Parser {
     if (formatBuilder.length() == 0) {
       findNewsTag(lines, formatBuilder, secondTag);
     }
-    return replaceColons(formatBuilder.toString());
+    return replaceUnnecessarySymbols(formatBuilder.toString());
   }
 
   private void findNewsTag(ArrayList<String> lines, StringBuilder builder, String tag) {
@@ -135,8 +136,11 @@ public class Parser {
         .getTextContent();
   }
 
-  private String replaceColons(String str) {
-    return str.replace(":: ::", ":").replace("::", "").trim();
+  private String replaceUnnecessarySymbols(String str) {
+    return str.replaceAll(":: ::", ":")
+        .replaceAll("::", "")
+        .replace(". Кач-во", "")
+        .trim();
   }
 
   private DateTime getDateTime(HtmlElement newsElement) {
@@ -153,7 +157,7 @@ public class Parser {
         if (matcher.find()) {
           date = matcher.group();
           date = date.replace("|", "").trim();
-          dateTime = formatter.parseDateTime(date);
+          dateTime = Constant.FORMATTER.parseDateTime(date);
         }
       }
     }
@@ -195,7 +199,6 @@ public class Parser {
       }
     }
     return "";
-
   }
 
   private String getHref(List<HtmlElement> elements) {
