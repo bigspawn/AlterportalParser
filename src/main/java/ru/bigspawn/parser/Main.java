@@ -46,8 +46,9 @@ public class Main {
 
   private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {
     AlterPortalParser parser = new AlterPortalParser(new WebClient(), url);
-    Worker worker = new Worker(parser, bot, logger);
-    Thread thread = new Thread(worker, "Thread: " + Utils.getLoggerNameFromUrl(url));
+    String loggerName = Utils.getLoggerNameFromUrl(url);
+    Worker worker = new Worker(parser, bot, loggerName);
+    Thread thread = new Thread(worker, "Thread: " + loggerName);
     thread.start();
   }
 }

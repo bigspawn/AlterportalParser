@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.bigspawn.parser.bot.Bot;
 import ru.bigspawn.parser.entity.News;
@@ -38,10 +39,10 @@ public class Worker implements Runnable {
   private int maxRepeatedNews;
   private boolean key;
 
-  public Worker(Parser parser, Bot bot, Logger logger) throws UnsupportedEncodingException {
+  public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
     this.parser = parser;
     this.bot = bot;
-    this.logger = logger;
+    this.logger = LogManager.getLogger(loggerName);
     telegramChanel = Configuration.getInstance().getTelegramChanel();
     maxRepeatedNews = Configuration.getInstance().getMaxRepeatedNews();
     createConnection();
