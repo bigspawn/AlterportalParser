@@ -46,6 +46,10 @@ public class Configuration {
     ini.setConfig(conf);
   }
 
+  public static Configuration getInstance() {
+    return instance;
+  }
+
   private void initConfigs() throws IOException {
     Ini ini = new Ini(new File("settings.ini"));
     setIniConfigurations(ini);
@@ -66,10 +70,6 @@ public class Configuration {
         Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME_FOR_NEWS")));
     setMaxRepeatedNews(Integer.parseInt(ini.get(SECTION_PARSER, "MAX_REPEATED_NEWS")));
     logger.info("Init configurations " + this);
-  }
-
-  public static Configuration getInstance() {
-    return instance;
   }
 
   public ArrayList<String> getUrls() {

@@ -14,9 +14,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import ru.bigspawn.parser.Constant;
+import ru.bigspawn.parser.Utils;
 import ru.bigspawn.parser.entity.News;
 import ru.bigspawn.parser.entity.NewsType;
 
@@ -26,11 +28,11 @@ public class AlterPortalParser implements Parser {
   private String pageUrl;
   private Logger logger;
 
-  public AlterPortalParser(WebClient client, String pageUrl, Logger logger)
+  public AlterPortalParser(WebClient client, String pageUrl)
       throws UnsupportedEncodingException {
     this.client = client;
     this.pageUrl = pageUrl;
-    this.logger = logger;
+    this.logger = LogManager.getLogger(Utils.getLoggerNameFromUrl(pageUrl));
     setOptions();
   }
 

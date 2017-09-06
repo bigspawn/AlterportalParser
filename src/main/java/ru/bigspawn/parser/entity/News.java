@@ -43,16 +43,16 @@ public class News {
     return title;
   }
 
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
   public String getImageURL() {
     return imageURL;
   }
 
   public void setImageURL(String imageURL) {
     this.imageURL = imageURL;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
   }
 
   public NewsType getType() {
@@ -193,16 +193,15 @@ public class News {
 
   @Override
   public String toString() {
-    return "News{" +
-        "title='" + title + '\'' +
-        ", type='" + type + '\'' +
-        ", dateTime=" + dateTime +
-        ", genre='" + genre + '\'' +
-        ", format='" + format + '\'' +
-        ", country='" + country + '\'' +
-        ", playlist='" + playlist.replace('\n', ',') + '\'' +
-        ", downloadURL='" + downloadURL + '\'' +
-        ", imageURL='" + imageURL + '\'' +
-        '}';
+    StringBuilder sb = new StringBuilder();
+    return sb.append("News{title='").append(title)
+        .append("', type='").append(type)
+        .append("', dateTime=").append(dateTime)
+        .append(", genre='").append(genre)
+        .append("', format='").append(format)
+        .append("', country='").append(country)
+        .append("', playlist='").append(playlist.replace('\n', ','))
+        .append("', downloadURL='").append(downloadURL)
+        .append("', imageURL='").append(imageURL).append("'}").toString();
   }
 }

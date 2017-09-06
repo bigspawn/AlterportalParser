@@ -24,10 +24,9 @@ public class Worker implements Runnable {
   private static final String SELECT_NEWS =
       "SELECT * FROM " + Configuration.getInstance().getDbName() + " WHERE title = ?";
   private static final String INSERT_NEWS =
-      " INSERT INTO " + Configuration.getInstance().getDbName() +
-          " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url)"
-          +
-          " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
+      " INSERT INTO " + Configuration.getInstance().getDbName()
+          + " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url)"
+          + " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
 
   private Parser parser;
   private Bot bot;
