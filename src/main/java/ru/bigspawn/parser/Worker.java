@@ -22,42 +22,37 @@ import ru.bigspawn.parser.parser.Parser;
  */
 public class Worker implements Runnable {
 
+  private static final int SLEEPING_TIME = Configuration.getInstance().getSleepingTime();
+  private static final int SLEEPING_TIME_FOR_NEWS = Configuration.getInstance()
+      .getSleepingTimeForNews();
+  private static final int MAX_REPEATED_NEWS = Configuration.getInstance().getMaxRepeatedNews();
+  private static final String TELEGRAM_CHANEL = Configuration.getInstance().getTelegramChanel();
   private static final String SELECT_NEWS =
       "SELECT * FROM " + Configuration.getInstance().getDbName() + " WHERE title = ?";
-  private static final String INSERT_NEWS =
-      " INSERT INTO " + Configuration.getInstance().getDbName()
-          + " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url)"
-          + " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
+  private static final String INSERT_NEWS = "INSERT INTO " + Configuration.getInstance().getDbName()
+      + " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url)"
+      + " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
 
   private Parser parser;
   private Bot bot;
   private Logger logger;
   private Connection connection;
-  private String telegramChanel;
   private int newsCounter;
   private int pageNumber = 1;
-  private int maxRepeatedNews;
-  private boolean key;
+  private boolean isNewsRepeatedMaxTimes;
 
   public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
     this.parser = parser;
     this.bot = bot;
     this.logger = LogManager.getLogger(loggerName);
-    telegramChanel = Configuration.getInstance().getTelegramChanel();
-    maxRepeatedNews = Configuration.getInstance().getMaxRepeatedNews();
-    createConnection();
   }
 
-  private void createConnection() {
-    try {
-      Class.forName("org.postgresql.Driver");
-      connection = DriverManager.getConnection(
-          Configuration.getInstance().getDbUrl(),
-          Configuration.getInstance().getDbUser(),
-          Configuration.getInstance().getDbPassword());
-    } catch (ClassNotFoundException | SQLException e) {
-      logger.error(e, e);
-    }
+  private void createConnection() throws SQLException, ClassNotFoundException {
+    Class.forName("org.postgresql.Driver");
+    connection = DriverManager.getConnection(
+        Configuration.getInstance().getDbUrl(),
+        Configuration.getInstance().getDbUser(),
+        Configuration.getInstance().getDbPassword());
   }
 
   @Override
@@ -65,49 +60,61 @@ public class Worker implements Runnable {
     logger.info("Start worker: " + Thread.currentThread().getName());
     while (!Thread.currentThread().isInterrupted()) {
       try {
-        List<News> news = parser.parse(pageNumber);
-        if (news == null) {
-          sleep();
+        if (connection == null) {
+          createConnection();
         } else {
-          for (News article : news) {
-            if (!ifAlreadyPosted(article)) {
-              insetToDatabase(article);
-              sendToChannel(article);
-              int sleepingTimeForNews = Configuration.getInstance().getSleepingTimeForNews();
-              logger.info("Sleep " + sleepingTimeForNews + " seconds");
-              TimeUnit.SECONDS.sleep(sleepingTimeForNews);
+          List<News> news = parser.parse(pageNumber);
+          if (news != null && news.size() > 0) {
+            postNews(news);
+            if (isNewsRepeatedMaxTimes) {
+              sleep("News repeated");
             } else {
-              newsCounter++;
-              key = pageNumber != 1 || newsCounter >= maxRepeatedNews;
-              if (key) {
-                break;
-              }
+              pageNumber++;
             }
-          }
-          if (key) {
-            logger.info("All news on page: " + pageNumber + " was repeated!");
-            sleep();
           } else {
-            pageNumber++;
+            sleep("Waiting for new news.");
           }
         }
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
+      } catch (SQLException | ClassNotFoundException e) {
+        logger.error(e, e);
+        sleep(e.getMessage());
       }
     }
     logger.info("Stop worker");
   }
 
-  private void sleep() throws UnsupportedEncodingException, InterruptedException {
-    pageNumber = 1;
-    newsCounter = 0;
-    key = false;
-    int sleepingTime = Configuration.getInstance().getSleepingTime();
-    logger.info("Waiting for new news. Sleep " + sleepingTime + " minutes");
-    TimeUnit.MINUTES.sleep(sleepingTime);
+  private void postNews(List<News> news) throws InterruptedException {
+    isNewsRepeatedMaxTimes = false;
+    for (News article : news) {
+      if (isPosted(article)) {
+        if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
+          isNewsRepeatedMaxTimes = true;
+          logger.info("News was repeated " + newsCounter + " times!");
+          break;
+        }
+      } else {
+        insetToDatabase(article);
+        sendToChannel(article);
+        logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
+        TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
+      }
+    }
   }
 
-  private boolean ifAlreadyPosted(News news) {
+  private void sleep(String message) {
+    try {
+      logger.info(message + ". Sleep " + SLEEPING_TIME + " minutes");
+      pageNumber = 1;
+      newsCounter = 0;
+      TimeUnit.MINUTES.sleep(SLEEPING_TIME);
+    } catch (InterruptedException e) {
+      logger.error(e, e);
+    }
+  }
+
+  private boolean isPosted(News news) {
     try (PreparedStatement ps = connection.prepareStatement(SELECT_NEWS)) {
       ps.setString(1, news.getTitle());
       ResultSet rs = ps.executeQuery();
@@ -141,7 +148,7 @@ public class Worker implements Runnable {
   private synchronized void sendToChannel(News news) {
     try {
       logger.info("Try send news: " + news);
-      bot.sendNewsToChanel(news, telegramChanel);
+      bot.sendNewsToChanel(news, TELEGRAM_CHANEL);
     } catch (Exception e) {
       logger.error(e, e);
     }

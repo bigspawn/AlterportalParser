@@ -33,10 +33,10 @@ public class AlterPortalParser implements Parser {
     this.client = client;
     this.pageUrl = pageUrl;
     this.logger = LogManager.getLogger(Utils.getLoggerNameFromUrl(pageUrl));
-    setOptions();
+    setWebClientOptions();
   }
 
-  private void setOptions() {
+  private void setWebClientOptions() {
     client.getOptions().setCssEnabled(false);
     client.getOptions().setJavaScriptEnabled(false);
   }
@@ -79,10 +79,6 @@ public class AlterPortalParser implements Parser {
                 .getByXPath("//div[contains(@id, \"news-id\")]").get(0);
             ArrayList<String> lines = getNewsAsStringArray(newsBodyHtmlElement);
             news.setGenre(getNewsTag(lines, "Стиль", "Жанр"));
-            if (type != NewsType.Concerts) {
-              news.setCountry(getNewsTag(lines, "Страна", "Родина"));
-              news.setFormat(getNewsTag(lines, "Формат", "Качество"));
-            }
             news.setPlaylist(getTrackList(lines));
             List<HtmlElement> aElements = newsBodyHtmlElement.getElementsByTagName("a");
             if (aElements != null && !aElements.isEmpty()) {
@@ -93,7 +89,7 @@ public class AlterPortalParser implements Parser {
                 imageUrl = getImageSrc(newsBodyHtmlElement.getElementsByTagName("img"));
               }
               news.setImageURL(imageUrl);
-              if (type != NewsType.Concerts && type != NewsType.News) {
+              if (type != NewsType.News) {
                 news.setDownloadURL(getHref(aElements));
               }
             }
