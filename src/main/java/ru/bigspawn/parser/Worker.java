@@ -28,10 +28,10 @@ public class Worker implements Runnable {
   private static final int MAX_REPEATED_NEWS = Configuration.getInstance().getMaxRepeatedNews();
   private static final String TELEGRAM_CHANEL = Configuration.getInstance().getTelegramChanel();
   private static final String SELECT_NEWS =
-      "SELECT * FROM " + Configuration.getInstance().getDbName() + " WHERE title = ?";
-  private static final String INSERT_NEWS = "INSERT INTO " + Configuration.getInstance().getDbName()
-      + " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url)"
-      + " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
+      String.format("SELECT * FROM %s WHERE title = ?", Configuration.getInstance().getDbName());
+  private static final String INSERT_NEWS = String.format(
+      "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)",
+      Configuration.getInstance().getDbName());
 
   private Parser parser;
   private Bot bot;
@@ -64,16 +64,7 @@ public class Worker implements Runnable {
           createConnection();
         } else {
           List<News> news = parser.parse(pageNumber);
-          if (news != null && news.size() > 0) {
-            postNews(news);
-            if (isNewsRepeatedMaxTimes) {
-              sleep("News repeated");
-            } else {
-              pageNumber++;
-            }
-          } else {
-            sleep("Waiting for new news.");
-          }
+          doLogic(news);
         }
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
@@ -83,6 +74,19 @@ public class Worker implements Runnable {
       }
     }
     logger.info("Stop worker");
+  }
+
+  private void doLogic(List<News> news) throws InterruptedException {
+    if (news != null && news.size() > 0) {
+      postNews(news);
+      if (isNewsRepeatedMaxTimes) {
+        sleep("News repeated");
+      } else {
+        pageNumber++;
+      }
+    } else {
+      sleep("Waiting for new news.");
+    }
   }
 
   private void postNews(List<News> news) throws InterruptedException {
@@ -152,5 +156,10 @@ public class Worker implements Runnable {
     } catch (Exception e) {
       logger.error(e, e);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "Worker{" + logger.getName() + '}';
   }
 }

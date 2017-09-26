@@ -48,7 +48,9 @@ public class Main {
     AlterPortalParser parser = new AlterPortalParser(new WebClient(), url);
     String loggerName = Utils.getLoggerNameFromUrl(url);
     Worker worker = new Worker(parser, bot, loggerName);
+    logger.debug("Create " + worker);
     Thread thread = new Thread(worker, "Thread: " + loggerName);
     thread.start();
+    logger.debug("Start " + thread);
   }
 }
