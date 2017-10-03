@@ -1,5 +1,11 @@
 package ru.bigspawn.parser.parser;
 
+import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY;
+import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DATE;
+import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DIV;
+import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_TITLE;
+import static ru.bigspawn.parser.Constant.XPATH_NEWS_CONTENT;
+
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -45,82 +51,91 @@ public class AlterPortalParser implements Parser {
   public List<News> parse(int pageNumber) throws IOException {
     String pageURL = getPageURL(pageNumber);
     logger.info("Start parsing news from " + pageURL);
-    List<News> newsList = new ArrayList<>();
     HtmlPage page = client.getPage(pageURL);
     if (page.getBaseURL().getFile().contains("cgi-sys/suspendedpage.cgi")) {
-      logger.error("Alterportal is unavailable! Page: " + page.getBaseURL());
+      logger.error("Site is unavailable! Page: " + page.getBaseURL());
       return null;
     }
-    List<HtmlElement> elements = page
-        .getByXPath("//*[@id=\"dle-content\"]/table/tbody/tr/td/table");
-    for (HtmlElement element : elements) {
-      List<HtmlElement> titleTds = element.getElementsByAttribute("td", "class", "category");
-      if (titleTds != null && !titleTds.isEmpty()) {
-        String newsCategory = titleTds.get(0).asText().trim();
-        Optional<NewsType> optional = Arrays.stream(NewsType.values())
-            .filter(x -> newsCategory.equals(x.getName()))
-            .findFirst();
+    return getNews(page);
+  }
+
+  private String getPageURL(int pageNumber) throws UnsupportedEncodingException {
+    return pageUrl + URLEncoder.encode(String.valueOf(pageNumber), "UTF-8") + '/';
+  }
+
+  private List<News> getNews(HtmlPage page) throws IOException {
+    List<News> newsList = new ArrayList<>();
+    List<HtmlElement> contents = page.getByXPath(XPATH_NEWS_BODY);
+    for (HtmlElement content : contents) {
+      List<HtmlElement> categories = content.getElementsByAttribute("td", "class", "category");
+      if (categories != null && !categories.isEmpty()) {
+        String category = categories.get(0).asText().trim();
+        Optional<NewsType> optional =
+            Arrays.stream(NewsType.values())
+                .filter(c -> category.equals(c.getName()))
+                .findFirst();
         if (optional.isPresent()) {
           NewsType type = optional.get();
-          HtmlElement titleElement = element
-              .getElementsByAttribute("td", "class", "ntitle")
-              .get(0);
-          String newsURL = titleElement.getElementsByTagName("a").get(0).getAttribute("href");
-          logger.info("News url: " + newsURL);
-          page = client.getPage(newsURL);
-          List<HtmlElement> newsElements = page.getByXPath("//*[@id=\"dle-content\"]");
-          if (newsElements != null && !newsElements.isEmpty()) {
-            HtmlElement newsElement = newsElements.get(0);
-            News news = new News();
-            news.setType(type);
-            news.setTitle(getNewsTitle(newsElement));
-
-            HtmlElement newsBodyHtmlElement = (HtmlElement) newsElement
-                .getByXPath("//div[contains(@id, \"news-id\")]").get(0);
-            ArrayList<String> lines = getNewsAsStringArray(newsBodyHtmlElement);
-            news.setGenre(getNewsTag(lines, "Стиль", "Жанр"));
-            news.setPlaylist(getTrackList(lines));
-            List<HtmlElement> aElements = newsBodyHtmlElement.getElementsByTagName("a");
-            if (aElements != null && !aElements.isEmpty()) {
-              String imageUrl = getImageUrl(aElements);
-              if (imageUrl == null || imageUrl.isEmpty()
-                  || !imageUrl.contains("fastpic")
-                  || !imageUrl.contains("radikal")) {
-                imageUrl = getImageSrc(newsBodyHtmlElement.getElementsByTagName("img"));
-              }
-              news.setImageURL(imageUrl);
-              if (type != NewsType.News) {
-                news.setDownloadURL(getHref(aElements));
-              }
+          List<HtmlElement> titles = content.getElementsByAttribute("td", "class", "ntitle");
+          if (titles != null && !titles.isEmpty()) {
+            HtmlElement title = titles.get(0);
+            String url = title.getElementsByTagName("a").get(0).getAttribute("href");
+            logger.info("News url: " + url);
+            News news = getNewsFromPage(type, url);
+            if (news != null) {
+              newsList.add(news);
             }
-            news.setDateTime(getDateTime(newsElement));
-            newsList.add(news);
           }
         }
       }
     }
-    logger.info("Finish parsing.");
     return newsList;
   }
 
-  private String getPageURL(int pageNumber) throws UnsupportedEncodingException {
-    return pageUrl + URLEncoder.encode(String.valueOf(pageNumber), "UTF-8") + "/";
+  private News getNewsFromPage(NewsType type, String newsURL)
+      throws IOException {
+    HtmlPage page = client.getPage(newsURL);
+    List<HtmlElement> contents = page.getByXPath(XPATH_NEWS_CONTENT);
+    if (contents != null && !contents.isEmpty()) {
+      HtmlElement content = contents.get(0);
+      List<HtmlElement> bodies = content.getByXPath(XPATH_NEWS_BODY_DIV);
+      if (bodies != null && !bodies.isEmpty()) {
+        HtmlElement body = bodies.get(0);
+        ArrayList<String> lines = getNewsLines(body);
+        News news = new News();
+        news.setType(type);
+        news.setTitle(getTitle(content));
+        news.setGenre(getContentByTag(lines, "Стиль", "Жанр"));
+        news.setFormat(getContentByTag(lines, "Формат", "Качество"));
+        news.setCountry(getContentByTag(lines, "Страна"));
+        news.setPlaylist(getTrackList(lines));
+        news.setImageURL(getImageUrl(body));
+        news.setDateTime(getDateTime(content));
+        if (type != NewsType.News) {
+          news.setDownloadURL(getHref(body));
+        }
+        return news;
+      }
+    }
+    return null;
   }
 
-  private ArrayList<String> getNewsAsStringArray(HtmlElement newsBodyHtmlElement) {
-    String newsBody = newsBodyHtmlElement.asText();
-    ArrayList<String> lines = new ArrayList<>(Arrays.asList(newsBody.split("\r\n")));
+  private ArrayList<String> getNewsLines(HtmlElement body) {
+    ArrayList<String> lines = new ArrayList<>(Arrays.asList(body.asText().split("\r\n")));
     lines.removeAll(Collections.singleton(""));
     return lines;
   }
 
-  private String getNewsTag(ArrayList<String> lines, String firstTag, String secondTag) {
-    StringBuilder formatBuilder = new StringBuilder();
-    findNewsTag(lines, formatBuilder, firstTag);
-    if (formatBuilder.length() == 0) {
-      findNewsTag(lines, formatBuilder, secondTag);
+  private String getContentByTag(ArrayList<String> lines, String... tags) {
+    StringBuilder builder = new StringBuilder();
+    for (String tag : tags) {
+      if (builder.length() == 0) {
+        findNewsTag(lines, builder, tag);
+      } else {
+        break;
+      }
     }
-    return replaceUnnecessarySymbols(formatBuilder.toString());
+    return replaceUnnecessarySymbols(builder.toString());
   }
 
   private void findNewsTag(ArrayList<String> lines, StringBuilder builder, String tag) {
@@ -130,25 +145,29 @@ public class AlterPortalParser implements Parser {
     first.ifPresent(builder::append);
   }
 
-  private String getNewsTitle(HtmlElement newsElement) {
-    return ((HtmlElement) newsElement
-        .getByXPath("//table/tbody/tr/td/table/tbody/tr/td[@class=\"ntitle\"]").get(0))
-        .getTextContent();
+  private String getTitle(HtmlElement element) {
+    List<HtmlElement> titles = element.getByXPath(XPATH_NEWS_BODY_TITLE);
+    if (titles != null && !titles.isEmpty()) {
+      return titles.get(0).getTextContent();
+    }
+    return "";
   }
 
-  private String replaceUnnecessarySymbols(String str) {
-    return str.replaceAll(":: ::", ":")
-        .replaceAll("::", "")
-        .replace(". Кач-во", "")
-        .trim();
+  private String replaceUnnecessarySymbols(String tag) {
+    if (tag != null && !tag.isEmpty()) {
+      return tag.replaceAll(":: ::", ":")
+          .replaceAll("::", "")
+          .replace(". Кач-во", "")
+          .trim();
+    }
+    return "";
   }
 
-  private DateTime getDateTime(HtmlElement newsElement) {
+  private DateTime getDateTime(HtmlElement content) {
     DateTime dateTime = DateTime.now();
-    List<HtmlElement> commentElements = newsElement.getByXPath(
-        "//*[@id=\"dle-content\"]/table/tbody/tr/td/div[@class=\"slink1\"]");
-    if (commentElements != null && !commentElements.isEmpty()) {
-      String date = commentElements.get(0).getTextContent().trim();
+    List<HtmlElement> dateElements = content.getByXPath(XPATH_NEWS_BODY_DATE);
+    if (dateElements != null && !dateElements.isEmpty()) {
+      String date = dateElements.get(0).getTextContent().trim();
       if (StringUtils.contains(date, "Вчера")) {
         dateTime = dateTime.minusDays(1);
       } else if (!StringUtils.contains(date, "Сегодня")) {
@@ -186,9 +205,14 @@ public class AlterPortalParser implements Parser {
     return tracks.toString();
   }
 
-  private String getImageUrl(List<HtmlElement> aElements) {
-    List<HtmlElement> imageElements = aElements.get(0).getElementsByTagName("img");
-    return getImageSrc(imageElements);
+  private String getImageUrl(HtmlElement body) {
+    List<HtmlElement> urls = body.getElementsByTagName("a");
+    String imageUrl = getImageSrc(urls);
+    if (imageUrl == null || imageUrl.isEmpty() || !imageUrl.contains("fastpic")
+        || !imageUrl.contains("radikal")) {
+      imageUrl = getImageSrc(body.getElementsByTagName("img"));
+    }
+    return imageUrl;
   }
 
   private String getImageSrc(List<HtmlElement> imageElements) {
@@ -201,7 +225,8 @@ public class AlterPortalParser implements Parser {
     return "";
   }
 
-  private String getHref(List<HtmlElement> elements) {
+  private String getHref(HtmlElement body) {
+    List<HtmlElement> elements = body.getElementsByTagName("a");
     for (HtmlElement element : elements) {
       String href = element.getAttribute("href");
       for (String downloadResource : Constant.DOWNLOAD_RESOURCES) {

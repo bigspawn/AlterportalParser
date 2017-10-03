@@ -1,9 +1,8 @@
 package ru.bigspawn.parser.bot;
 
-import static ru.bigspawn.parser.Main.logger;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.Logger;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Update;
@@ -12,24 +11,28 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboar
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.bigspawn.parser.Configuration;
+import ru.bigspawn.parser.Main;
 import ru.bigspawn.parser.entity.News;
+
 
 /**
  * Created by bigspawn on 15.06.2017.
  */
 public class Bot extends TelegramLongPollingBot {
 
-  public synchronized void sendNewsToChanel(News news, String chatId) throws Exception {
+  public synchronized void sendNewsToChanel(News news, String chatId, Logger logger)
+      throws Exception {
     if (news.getImageURL() != null) {
-      sendPhotoIntoChannel(news, chatId);
+      sendPhotoIntoChannel(news, chatId, logger);
     }
     String textForMessage = news.getTextForMessage();
     if (textForMessage != null && !textForMessage.isEmpty()) {
-      sendMessageToChannel(chatId, news);
+      sendMessageToChannel(chatId, news, logger);
     }
   }
 
-  private void sendPhotoIntoChannel(News news, String chatId) {
+  private void sendPhotoIntoChannel(News news, String chatId,
+      Logger logger) {
     String imageURL = news.getImageURL();
     SendPhoto sendPhotoRequest = new SendPhoto();
     sendPhotoRequest.setChatId(chatId);
@@ -42,7 +45,8 @@ public class Bot extends TelegramLongPollingBot {
     }
   }
 
-  private void sendMessageToChannel(String chatId, News news) {
+  private void sendMessageToChannel(String chatId, News news,
+      Logger logger) {
     try {
       if (news.getDownloadURL() != null && !news.getDownloadURL().isEmpty()) {
         sendMessage(sendNewsWithDownloadButton(chatId, news));
@@ -61,7 +65,7 @@ public class Bot extends TelegramLongPollingBot {
       SendMessage message = new SendMessage()
           .setChatId(update.getMessage().getChatId())
           .setText(update.getMessage().getText());
-      logger.info("Bot get message: " + message);
+      Main.logger.info("Bot get message: " + message);
     }
   }
 

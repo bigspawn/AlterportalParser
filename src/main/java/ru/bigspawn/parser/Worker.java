@@ -64,6 +64,7 @@ public class Worker implements Runnable {
           createConnection();
         } else {
           List<News> news = parser.parse(pageNumber);
+          logger.info("Finish parsing.");
           doLogic(news);
         }
       } catch (InterruptedException | IOException e) {
@@ -152,7 +153,7 @@ public class Worker implements Runnable {
   private synchronized void sendToChannel(News news) {
     try {
       logger.info("Try send news: " + news);
-      bot.sendNewsToChanel(news, TELEGRAM_CHANEL);
+      bot.sendNewsToChanel(news, TELEGRAM_CHANEL, logger);
     } catch (Exception e) {
       logger.error(e, e);
     }
