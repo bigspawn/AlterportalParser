@@ -39,7 +39,6 @@ public class Worker implements Runnable {
   private Connection connection;
   private int newsCounter;
   private int pageNumber = 1;
-  private boolean isNewsRepeatedMaxTimes;
 
   public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
     this.parser = parser;
@@ -63,9 +62,7 @@ public class Worker implements Runnable {
         if (connection == null) {
           createConnection();
         } else {
-          List<News> news = parser.parse(pageNumber);
-          logger.info("Finish parsing.");
-          doLogic(news);
+          sendNews(parser.parse(pageNumber));
         }
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
@@ -77,9 +74,23 @@ public class Worker implements Runnable {
     logger.info("Stop worker");
   }
 
-  private void doLogic(List<News> news) throws InterruptedException {
+  private void sendNews(List<News> news) throws InterruptedException {
     if (news != null && news.size() > 0) {
-      postNews(news);
+      boolean isNewsRepeatedMaxTimes = false;
+      for (News article : news) {
+        if (isPosted(article)) {
+          if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
+            isNewsRepeatedMaxTimes = true;
+            logger.info("News was repeated " + newsCounter + " times!");
+            break;
+          }
+        } else {
+          insetToDatabase(article);
+          sendToChannel(article);
+          logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
+          TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
+        }
+      }
       if (isNewsRepeatedMaxTimes) {
         sleep("News repeated");
       } else {
@@ -87,24 +98,6 @@ public class Worker implements Runnable {
       }
     } else {
       sleep("Waiting for new news.");
-    }
-  }
-
-  private void postNews(List<News> news) throws InterruptedException {
-    isNewsRepeatedMaxTimes = false;
-    for (News article : news) {
-      if (isPosted(article)) {
-        if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
-          isNewsRepeatedMaxTimes = true;
-          logger.info("News was repeated " + newsCounter + " times!");
-          break;
-        }
-      } else {
-        insetToDatabase(article);
-        sendToChannel(article);
-        logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
-        TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
-      }
     }
   }
 
@@ -152,7 +145,7 @@ public class Worker implements Runnable {
 
   private synchronized void sendToChannel(News news) {
     try {
-      logger.info("Try send news: " + news);
+      logger.info("Try sendNews news: " + news);
       bot.sendNewsToChanel(news, TELEGRAM_CHANEL, logger);
     } catch (Exception e) {
       logger.error(e, e);

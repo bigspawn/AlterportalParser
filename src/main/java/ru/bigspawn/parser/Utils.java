@@ -14,12 +14,6 @@ public class Utils {
     return url;
   }
 
-  public static void appendIfNotNPE(StringBuilder builder, String text, String preText) {
-    if (text != null && !text.isEmpty()) {
-      builder.append(preText).append(text).append('\n');
-    }
-  }
-
   public static void appendIfNotNPE(StringBuilder builder, String... tags) {
     if (tags != null && tags.length > 0) {
       for (String tag : tags) {
