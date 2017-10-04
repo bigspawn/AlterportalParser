@@ -30,7 +30,8 @@ public class Worker implements Runnable {
   private static final String SELECT_NEWS =
       String.format("SELECT * FROM %s WHERE title = ?", Configuration.getInstance().getDbName());
   private static final String INSERT_NEWS = String.format(
-      "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
+          + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)",
       Configuration.getInstance().getDbName());
 
   private Parser parser;
@@ -95,6 +96,7 @@ public class Worker implements Runnable {
         sleep("News repeated");
       } else {
         pageNumber++;
+        logger.debug("Go to next page: " + pageNumber);
       }
     } else {
       sleep("Waiting for new news.");
@@ -106,6 +108,7 @@ public class Worker implements Runnable {
       logger.info(message + ". Sleep " + SLEEPING_TIME + " minutes");
       pageNumber = 1;
       newsCounter = 0;
+      logger.debug(this);
       TimeUnit.MINUTES.sleep(SLEEPING_TIME);
     } catch (InterruptedException e) {
       logger.error(e, e);
@@ -123,10 +126,12 @@ public class Worker implements Runnable {
     } catch (SQLException e) {
       logger.error(e, e);
     }
+    logger.debug("News is new: " + news);
     return false;
   }
 
   private void insetToDatabase(News news) {
+    logger.debug("Try insert new into db: " + news);
     try (PreparedStatement ps = connection.prepareStatement(INSERT_NEWS)) {
       ps.setString(1, news.getTitle());
       ps.setString(2, news.getType().getName());
@@ -146,7 +151,7 @@ public class Worker implements Runnable {
   private synchronized void sendToChannel(News news) {
     try {
       logger.info("Try sendNews news: " + news);
-      bot.sendNewsToChanel(news, TELEGRAM_CHANEL, logger);
+      bot.sendNewsToChannel(news, TELEGRAM_CHANEL, logger);
     } catch (Exception e) {
       logger.error(e, e);
     }
@@ -154,6 +159,13 @@ public class Worker implements Runnable {
 
   @Override
   public String toString() {
-    return "Worker{" + logger.getName() + '}';
+    return "Worker{" +
+        "parser=" + parser +
+        ", bot=" + bot +
+        ", logger=" + logger +
+        ", connection=" + connection +
+        ", newsCounter=" + newsCounter +
+        ", pageNumber=" + pageNumber +
+        '}';
   }
 }

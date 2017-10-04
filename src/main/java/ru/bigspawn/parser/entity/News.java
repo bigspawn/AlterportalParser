@@ -120,7 +120,7 @@ public class News {
     }
     Utils.appendIfNotNPE(builder, genre, format, country);
     builder.append("Дата: ").append(Constant.FORMATTER.print(dateTime)).append('\n');
-    Utils.appendIfNotNPE(builder, playlist, "Плейлист: \n");
+    Utils.appendIfNotNPE(builder, "Плейлист: ", playlist);
     return builder.toString();
   }
 

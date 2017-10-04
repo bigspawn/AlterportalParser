@@ -1,5 +1,7 @@
 package ru.bigspawn.parser.bot;
 
+import static ru.bigspawn.parser.Constant.DOWNLOAD_BUTTON_TEXT;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.Logger;
@@ -20,8 +22,9 @@ import ru.bigspawn.parser.entity.News;
  */
 public class Bot extends TelegramLongPollingBot {
 
-  public synchronized void sendNewsToChanel(News news, String chatId, Logger logger)
+  public synchronized void sendNewsToChannel(News news, String chatId, Logger logger)
       throws Exception {
+    logger.debug("Try to send news " + news + " into channel");
     if (news.getImageURL() != null) {
       sendPhotoIntoChannel(news, chatId, logger);
     }
@@ -31,13 +34,13 @@ public class Bot extends TelegramLongPollingBot {
     }
   }
 
-  private void sendPhotoIntoChannel(News news, String chatId,
-      Logger logger) {
+  private void sendPhotoIntoChannel(News news, String chatId, Logger logger) {
     String imageURL = news.getImageURL();
     SendPhoto sendPhotoRequest = new SendPhoto();
     sendPhotoRequest.setChatId(chatId);
     sendPhotoRequest.setPhoto(imageURL);
     try {
+      logger.debug("Send image: " + imageURL);
       sendPhoto(sendPhotoRequest);
     } catch (TelegramApiException e) {
       logger.error(e, e);
@@ -45,8 +48,7 @@ public class Bot extends TelegramLongPollingBot {
     }
   }
 
-  private void sendMessageToChannel(String chatId, News news,
-      Logger logger) {
+  private void sendMessageToChannel(String chatId, News news, Logger logger) {
     try {
       if (news.getDownloadURL() != null && !news.getDownloadURL().isEmpty()) {
         sendMessage(sendNewsWithDownloadButton(chatId, news));
@@ -84,7 +86,7 @@ public class Bot extends TelegramLongPollingBot {
     List<List<InlineKeyboardButton>> rows = new ArrayList<>();
     List<InlineKeyboardButton> row = new ArrayList<>();
     InlineKeyboardButton button = new InlineKeyboardButton();
-    button.setText("Download");
+    button.setText(DOWNLOAD_BUTTON_TEXT);
     button.setUrl(news.getDownloadURL());
     row.add(button);
     rows.add(row);

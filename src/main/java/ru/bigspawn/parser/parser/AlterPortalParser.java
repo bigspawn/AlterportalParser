@@ -75,6 +75,7 @@ public class AlterPortalParser implements Parser {
                 .filter(c -> category.equals(c.getName()))
                 .findFirst();
         if (optional.isPresent()) {
+          logger.debug("News category: " + category);
           NewsType type = optional.get();
           List<HtmlElement> titles = content.getElementsByAttribute("td", "class", "ntitle");
           if (titles != null && !titles.isEmpty()) {
@@ -85,10 +86,12 @@ public class AlterPortalParser implements Parser {
             if (news != null) {
               newsList.add(news);
             }
+            logger.debug("Parse news: " + news);
           }
         }
       }
     }
+    logger.debug("List of news: " + Arrays.toString(newsList.toArray()));
     return newsList;
   }
 
