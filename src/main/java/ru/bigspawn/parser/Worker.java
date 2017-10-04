@@ -79,17 +79,19 @@ public class Worker implements Runnable {
     if (news != null && news.size() > 0) {
       boolean isNewsRepeatedMaxTimes = false;
       for (News article : news) {
-        if (isPosted(article)) {
-          if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
-            isNewsRepeatedMaxTimes = true;
-            logger.info("News was repeated " + newsCounter + " times!");
-            break;
+        if (article != null) {
+          if (isPosted(article)) {
+            if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
+              isNewsRepeatedMaxTimes = true;
+              logger.info("News was repeated " + newsCounter + " times!");
+              break;
+            }
+          } else {
+            insetToDatabase(article);
+            sendToChannel(article);
+            logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
+            TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
           }
-        } else {
-          insetToDatabase(article);
-          sendToChannel(article);
-          logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
-          TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
         }
       }
       if (isNewsRepeatedMaxTimes) {
