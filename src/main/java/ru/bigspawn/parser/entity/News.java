@@ -2,6 +2,7 @@ package ru.bigspawn.parser.entity;
 
 import org.joda.time.DateTime;
 import ru.bigspawn.parser.Constant;
+import ru.bigspawn.parser.Utils;
 
 /**
  * Created by bigspawn on 30.05.2017.
@@ -113,29 +114,14 @@ public class News {
 
   public String getTextForMessage() {
     StringBuilder builder = new StringBuilder();
-    builder.append(title).append('\n')
-        .append("Категория: ").append(type).append('\n');
+    builder.append(title).append('\n').append("Категория: ").append(type).append('\n');
     if (type == NewsType.News) {
       builder.append("\n");
     }
-    addStringIfNotNullOrEmpty(builder, genre);
-    addStringIfNotNullOrEmpty(builder, format);
-    addStringIfNotNullOrEmpty(builder, country);
+    Utils.appendIfNotNPE(builder, genre, format, country);
     builder.append("Дата: ").append(Constant.FORMATTER.print(dateTime)).append('\n');
-    addStringIfNotNullOrEmpty(builder, playlist, "Плейлист: \n");
+    Utils.appendIfNotNPE(builder, "Плейлист: ", playlist);
     return builder.toString();
-  }
-
-  private void addStringIfNotNullOrEmpty(StringBuilder builder, String text) {
-    if (text != null && !text.isEmpty()) {
-      builder.append(text).append('\n');
-    }
-  }
-
-  private void addStringIfNotNullOrEmpty(StringBuilder builder, String text, String preText) {
-    if (text != null && !text.isEmpty()) {
-      builder.append(preText).append(text).append('\n');
-    }
   }
 
   @Override

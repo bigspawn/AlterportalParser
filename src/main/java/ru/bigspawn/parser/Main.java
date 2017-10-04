@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +21,9 @@ import ru.bigspawn.parser.parser.AlterPortalParser;
  */
 public class Main {
 
+  public static final int THREADS = 10;
   public static final Logger logger = LogManager.getLogger(Main.class.getName());
+  public static final ExecutorService executor = Executors.newFixedThreadPool(THREADS);
 
   public static void main(String[] args) {
     try {
@@ -48,7 +52,9 @@ public class Main {
     AlterPortalParser parser = new AlterPortalParser(new WebClient(), url);
     String loggerName = Utils.getLoggerNameFromUrl(url);
     Worker worker = new Worker(parser, bot, loggerName);
+    logger.debug("Create " + worker);
     Thread thread = new Thread(worker, "Thread: " + loggerName);
     thread.start();
+    logger.debug("Start " + thread);
   }
 }

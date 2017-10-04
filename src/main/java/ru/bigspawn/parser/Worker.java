@@ -22,42 +22,37 @@ import ru.bigspawn.parser.parser.Parser;
  */
 public class Worker implements Runnable {
 
+  private static final int SLEEPING_TIME = Configuration.getInstance().getSleepingTime();
+  private static final int SLEEPING_TIME_FOR_NEWS = Configuration.getInstance()
+      .getSleepingTimeForNews();
+  private static final int MAX_REPEATED_NEWS = Configuration.getInstance().getMaxRepeatedNews();
+  private static final String TELEGRAM_CHANEL = Configuration.getInstance().getTelegramChanel();
   private static final String SELECT_NEWS =
-      "SELECT * FROM " + Configuration.getInstance().getDbName() + " WHERE title = ?";
-  private static final String INSERT_NEWS =
-      " INSERT INTO " + Configuration.getInstance().getDbName()
-          + " (title, id_news_type, date, gender, format, country, playlist, download_url, image_url)"
-          + " VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)";
+      String.format("SELECT * FROM %s WHERE title = ?", Configuration.getInstance().getDbName());
+  private static final String INSERT_NEWS = String.format(
+      "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
+          + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)",
+      Configuration.getInstance().getDbName());
 
   private Parser parser;
   private Bot bot;
   private Logger logger;
   private Connection connection;
-  private String telegramChanel;
   private int newsCounter;
   private int pageNumber = 1;
-  private int maxRepeatedNews;
-  private boolean key;
 
   public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
     this.parser = parser;
     this.bot = bot;
     this.logger = LogManager.getLogger(loggerName);
-    telegramChanel = Configuration.getInstance().getTelegramChanel();
-    maxRepeatedNews = Configuration.getInstance().getMaxRepeatedNews();
-    createConnection();
   }
 
-  private void createConnection() {
-    try {
-      Class.forName("org.postgresql.Driver");
-      connection = DriverManager.getConnection(
-          Configuration.getInstance().getDbUrl(),
-          Configuration.getInstance().getDbUser(),
-          Configuration.getInstance().getDbPassword());
-    } catch (ClassNotFoundException | SQLException e) {
-      logger.error(e, e);
-    }
+  private void createConnection() throws SQLException, ClassNotFoundException {
+    Class.forName("org.postgresql.Driver");
+    connection = DriverManager.getConnection(
+        Configuration.getInstance().getDbUrl(),
+        Configuration.getInstance().getDbUser(),
+        Configuration.getInstance().getDbPassword());
   }
 
   @Override
@@ -65,45 +60,64 @@ public class Worker implements Runnable {
     logger.info("Start worker: " + Thread.currentThread().getName());
     while (!Thread.currentThread().isInterrupted()) {
       try {
-        List<News> news = parser.parse(pageNumber);
-        for (News article : news) {
-          if (!ifAlreadyPosted(article)) {
-            insetToDatabase(article);
-            sendToChannel(article);
-            int sleepingTimeForNews = Configuration.getInstance().getSleepingTimeForNews();
-            logger.info("Sleep " + sleepingTimeForNews + " seconds");
-            TimeUnit.SECONDS.sleep(sleepingTimeForNews);
-          } else {
-            newsCounter++;
-            key = pageNumber != 1 || newsCounter >= maxRepeatedNews;
-            if (key) {
-              break;
-            }
-          }
-        }
-        if (key) {
-          sleep();
+        if (connection == null) {
+          createConnection();
         } else {
-          pageNumber++;
+          sendNews(parser.parse(pageNumber));
         }
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
+      } catch (SQLException | ClassNotFoundException e) {
+        logger.error(e, e);
+        sleep(e.getMessage());
       }
     }
     logger.info("Stop worker");
   }
 
-  private void sleep() throws UnsupportedEncodingException, InterruptedException {
-    logger.info("All news on page: " + pageNumber + " was repeated!");
-    pageNumber = 1;
-    newsCounter = 0;
-    key = false;
-    int sleepingTime = Configuration.getInstance().getSleepingTime();
-    logger.info("Waiting for new news. Sleep " + sleepingTime + " minutes");
-    TimeUnit.MINUTES.sleep(sleepingTime);
+  private void sendNews(List<News> news) throws InterruptedException {
+    if (news != null && news.size() > 0) {
+      boolean isNewsRepeatedMaxTimes = false;
+      for (News article : news) {
+        if (article != null) {
+          if (isPosted(article)) {
+            if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
+              isNewsRepeatedMaxTimes = true;
+              logger.info("News was repeated " + newsCounter + " times!");
+              break;
+            }
+          } else {
+            insetToDatabase(article);
+            sendToChannel(article);
+            logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
+            TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
+          }
+        }
+      }
+      if (isNewsRepeatedMaxTimes) {
+        sleep("News repeated");
+      } else {
+        pageNumber++;
+        logger.debug("Go to next page: " + pageNumber);
+      }
+    } else {
+      sleep("Waiting for new news.");
+    }
   }
 
-  private boolean ifAlreadyPosted(News news) {
+  private void sleep(String message) {
+    try {
+      logger.info(message + ". Sleep " + SLEEPING_TIME + " minutes");
+      pageNumber = 1;
+      newsCounter = 0;
+      logger.debug(this);
+      TimeUnit.MINUTES.sleep(SLEEPING_TIME);
+    } catch (InterruptedException e) {
+      logger.error(e, e);
+    }
+  }
+
+  private boolean isPosted(News news) {
     try (PreparedStatement ps = connection.prepareStatement(SELECT_NEWS)) {
       ps.setString(1, news.getTitle());
       ResultSet rs = ps.executeQuery();
@@ -114,10 +128,12 @@ public class Worker implements Runnable {
     } catch (SQLException e) {
       logger.error(e, e);
     }
+    logger.debug("News is new: " + news);
     return false;
   }
 
   private void insetToDatabase(News news) {
+    logger.debug("Try insert new into db: " + news);
     try (PreparedStatement ps = connection.prepareStatement(INSERT_NEWS)) {
       ps.setString(1, news.getTitle());
       ps.setString(2, news.getType().getName());
@@ -136,10 +152,22 @@ public class Worker implements Runnable {
 
   private synchronized void sendToChannel(News news) {
     try {
-      logger.info("Try send news: " + news);
-      bot.sendNewsToChanel(news, telegramChanel);
+      logger.info("Try sendNews news: " + news);
+      bot.sendNewsToChannel(news, TELEGRAM_CHANEL, logger);
     } catch (Exception e) {
       logger.error(e, e);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "Worker{" +
+        "parser=" + parser +
+        ", bot=" + bot +
+        ", logger=" + logger +
+        ", connection=" + connection +
+        ", newsCounter=" + newsCounter +
+        ", pageNumber=" + pageNumber +
+        '}';
   }
 }

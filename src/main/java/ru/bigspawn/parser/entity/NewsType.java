@@ -14,8 +14,7 @@ public enum NewsType {
   Rock("Rock"),
   Experimental("Experimental"),
   Lossless("Аудио CD"),
-  NewTracks("Новые треки"),
-  Concerts("Концерты");
+  NewTracks("Новые треки");
 
   private String name;
 
