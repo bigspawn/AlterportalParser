@@ -21,9 +21,9 @@ import ru.bigspawn.parser.parser.AlterPortalParser;
  */
 public class Main {
 
-  public static final int THREADS = 10;
   public static final Logger logger = LogManager.getLogger(Main.class.getName());
-  public static final ExecutorService executor = Executors.newFixedThreadPool(THREADS);
+  public static final ExecutorService executor = Executors
+      .newFixedThreadPool(Configuration.getInstance().getThreads());
 
   public static void main(String[] args) {
     try {
@@ -44,7 +44,7 @@ public class Main {
     logger.info("Start workers " + urls.size() + " - " + Arrays.toString(urls.toArray()));
     for (String url : urls) {
       startWorker(bot, url);
-      TimeUnit.SECONDS.sleep(5);
+      TimeUnit.SECONDS.sleep(10);
     }
   }
 

@@ -67,32 +67,32 @@
   </Appenders>
 
   <Loggers>
-    <Logger additivity="false" level="debug" name="ru.bigspawn.parser.Main">
+    <Logger additivity="false" level="info" name="ru.bigspawn.parser.Main">
       <AppenderRef ref="Application"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="page">
+    <Logger additivity="false" level="info" name="page">
       <AppenderRef ref="Main"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="alternative">
+    <Logger additivity="false" level="info" name="alternative">
       <AppenderRef ref="Alternative"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="punk">
+    <Logger additivity="false" level="info" name="punk">
       <AppenderRef ref="Punk"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="emo_hardcore">
+    <Logger additivity="false" level="info" name="emo_hardcore">
       <AppenderRef ref="Emo_hardcore"/>
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger additivity="false" level="debug" name="metal">
+    <Logger additivity="false" level="info" name="metal">
       <AppenderRef ref="Metal"/>
       <AppenderRef ref="Console"/>
     </Logger>

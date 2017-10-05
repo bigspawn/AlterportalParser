@@ -27,10 +27,10 @@ public class Configuration {
   private String dbUser;
   private String dbPassword;
   private String dbName;
-  private String imagePath;
   private int sleepingTime;
   private int sleepingTimeForNews;
   private int maxRepeatedNews;
+  private int threads;
 
   private Configuration() {
     try {
@@ -64,11 +64,11 @@ public class Configuration {
     setDbUser(ini.get(SECTION_PARSER, "DB_USER"));
     setDbPassword(ini.get(SECTION_PARSER, "DB_PASSWD"));
     setDbName(ini.get(SECTION_PARSER, "DB_NAME"));
-    setImagePath(ini.get(SECTION_PARSER, "IMAGES_PATH"));
     setSleepingTime(Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME")));
     setSleepingTimeForNews(
         Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME_FOR_NEWS")));
     setMaxRepeatedNews(Integer.parseInt(ini.get(SECTION_PARSER, "MAX_REPEATED_NEWS")));
+    setThreads(Integer.parseInt(ini.get(SECTION_PARSER, "THREADS_COUNT")));
     logger.info("Init configurations " + this);
   }
 
@@ -152,20 +152,20 @@ public class Configuration {
     this.sleepingTimeForNews = sleepingTimeForNews;
   }
 
-  public String getImagePath() {
-    return imagePath;
-  }
-
-  public void setImagePath(String imagePath) {
-    this.imagePath = imagePath;
-  }
-
   public int getMaxRepeatedNews() {
     return maxRepeatedNews;
   }
 
   public void setMaxRepeatedNews(int maxRepeatedNews) {
     this.maxRepeatedNews = maxRepeatedNews;
+  }
+
+  public int getThreads() {
+    return threads;
+  }
+
+  public void setThreads(int threads) {
+    this.threads = threads;
   }
 
   @Override
@@ -179,10 +179,10 @@ public class Configuration {
         ", dbUser='" + dbUser + '\'' +
         ", dbPassword='" + dbPassword + '\'' +
         ", dbName='" + dbName + '\'' +
-        ", imagePath='" + imagePath + '\'' +
-        ", sleepingTime=" + sleepingTime +
-        ", sleepingTimeForNews=" + sleepingTimeForNews +
-        ", maxRepeatedNews=" + maxRepeatedNews +
+        ", sleepingTime=" + sleepingTime + '\'' +
+        ", sleepingTimeForNews=" + sleepingTimeForNews + '\'' +
+        ", maxRepeatedNews=" + maxRepeatedNews + '\'' +
+        ", threads=" + threads +
         '}';
   }
 }
