@@ -1,5 +1,6 @@
 package ru.bigspawn.parser;
 
+import com.gargoylesoftware.htmlunit.WebClient;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,5 +23,12 @@ public class Utils {
         }
       }
     }
+  }
+
+  public static WebClient getWebClient() {
+    WebClient client = new WebClient();
+    client.getOptions().setCssEnabled(false);
+    client.getOptions().setJavaScriptEnabled(false);
+    return client;
   }
 }

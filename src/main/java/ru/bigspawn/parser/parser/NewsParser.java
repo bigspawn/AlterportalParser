@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import ru.bigspawn.parser.Constant;
+import ru.bigspawn.parser.Utils;
 import ru.bigspawn.parser.entity.News;
 import ru.bigspawn.parser.entity.NewsType;
 
@@ -30,8 +31,8 @@ public class NewsParser implements Callable<News> {
   private HtmlElement content;
   private Logger logger;
 
-  public NewsParser(WebClient client, HtmlElement content, Logger logger) {
-    this.client = client;
+  public NewsParser(HtmlElement content, Logger logger) {
+    this.client = Utils.getWebClient();
     this.content = content;
     this.logger = logger;
   }
@@ -41,10 +42,9 @@ public class NewsParser implements Callable<News> {
     List<HtmlElement> categories = content.getElementsByAttribute("td", "class", "category");
     if (categories != null && !categories.isEmpty()) {
       String category = categories.get(0).asText().trim();
-      Optional<NewsType> optional =
-          Arrays.stream(NewsType.values())
-              .filter(c -> category.equals(c.getName()))
-              .findFirst();
+      Optional<NewsType> optional = Arrays.stream(NewsType.values())
+          .filter(c -> category.equals(c.getName()))
+          .findFirst();
       if (optional.isPresent()) {
         logger.debug("News category: " + category);
         NewsType type = optional.get();
@@ -54,7 +54,6 @@ public class NewsParser implements Callable<News> {
           String url = title.getElementsByTagName("a").get(0).getAttribute("href");
           logger.info("News url: " + url);
           News news = getNewsFromPage(type, url);
-          logger.debug("Parse news: " + news);
           if (news != null) {
             return news;
           }

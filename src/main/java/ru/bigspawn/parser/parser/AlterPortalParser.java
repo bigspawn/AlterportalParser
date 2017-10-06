@@ -24,17 +24,11 @@ public class AlterPortalParser implements Parser {
   private String pageUrl;
   private Logger logger;
 
-  public AlterPortalParser(WebClient client, String pageUrl)
+  public AlterPortalParser(String pageUrl)
       throws UnsupportedEncodingException {
-    this.client = client;
+    this.client = Utils.getWebClient();
     this.pageUrl = pageUrl;
     this.logger = LogManager.getLogger(Utils.getLoggerNameFromUrl(pageUrl));
-    setWebClientOptions();
-  }
-
-  private void setWebClientOptions() {
-    client.getOptions().setCssEnabled(false);
-    client.getOptions().setJavaScriptEnabled(false);
   }
 
   @Override
@@ -57,7 +51,7 @@ public class AlterPortalParser implements Parser {
     List<News> newsList = new ArrayList<>();
     List<Callable<News>> tasks = new ArrayList<>();
     List<HtmlElement> contents = page.getByXPath(XPATH_NEWS_BODY);
-    contents.forEach(content -> tasks.add(new NewsParser(client, content, logger)));
+    contents.forEach(content -> tasks.add(new NewsParser(content, logger)));
     try {
       executor.invokeAll(tasks)
           .stream()
