@@ -1,6 +1,5 @@
 package ru.bigspawn.parser;
 
-import com.gargoylesoftware.htmlunit.WebClient;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -21,9 +20,9 @@ import ru.bigspawn.parser.parser.AlterPortalParser;
  */
 public class Main {
 
-  public static final int THREADS = 10;
   public static final Logger logger = LogManager.getLogger(Main.class.getName());
-  public static final ExecutorService executor = Executors.newFixedThreadPool(THREADS);
+  public static final ExecutorService executor = Executors
+      .newFixedThreadPool(Configuration.getInstance().getThreads());
 
   public static void main(String[] args) {
     try {
@@ -44,12 +43,12 @@ public class Main {
     logger.info("Start workers " + urls.size() + " - " + Arrays.toString(urls.toArray()));
     for (String url : urls) {
       startWorker(bot, url);
-      TimeUnit.SECONDS.sleep(5);
+      TimeUnit.SECONDS.sleep(10);
     }
   }
 
   private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {
-    AlterPortalParser parser = new AlterPortalParser(new WebClient(), url);
+    AlterPortalParser parser = new AlterPortalParser(url);
     String loggerName = Utils.getLoggerNameFromUrl(url);
     Worker worker = new Worker(parser, bot, loggerName);
     logger.debug("Create " + worker);

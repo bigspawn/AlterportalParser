@@ -20,33 +20,27 @@ import ru.bigspawn.parser.entity.News;
 
 public class AlterPortalParser implements Parser {
 
-  private WebClient client;
   private String pageUrl;
   private Logger logger;
 
-  public AlterPortalParser(WebClient client, String pageUrl)
+  public AlterPortalParser(String pageUrl)
       throws UnsupportedEncodingException {
-    this.client = client;
     this.pageUrl = pageUrl;
     this.logger = LogManager.getLogger(Utils.getLoggerNameFromUrl(pageUrl));
-    setWebClientOptions();
-  }
-
-  private void setWebClientOptions() {
-    client.getOptions().setCssEnabled(false);
-    client.getOptions().setJavaScriptEnabled(false);
   }
 
   @Override
   public List<News> parse(int pageNumber) throws IOException {
     String pageURL = getPageURL(pageNumber);
     logger.info("Start parsing news from " + pageURL);
-    HtmlPage page = client.getPage(pageURL);
-    if (page.getBaseURL().getFile().contains("cgi-sys/suspendedpage.cgi")) {
-      logger.error("Site is unavailable! Page: " + page.getBaseURL());
-      return null;
+    try (WebClient client = Utils.getWebClient()) {
+      HtmlPage page = client.getPage(pageURL);
+      if (page.getBaseURL().getFile().contains("cgi-sys/suspendedpage.cgi")) {
+        logger.error("Site is unavailable! Page: " + page.getBaseURL());
+        return null;
+      }
+      return getNews(page);
     }
-    return getNews(page);
   }
 
   private String getPageURL(int pageNumber) throws UnsupportedEncodingException {
@@ -57,7 +51,7 @@ public class AlterPortalParser implements Parser {
     List<News> newsList = new ArrayList<>();
     List<Callable<News>> tasks = new ArrayList<>();
     List<HtmlElement> contents = page.getByXPath(XPATH_NEWS_BODY);
-    contents.forEach(content -> tasks.add(new NewsParser(client, content, logger)));
+    contents.forEach(content -> tasks.add(new NewsPageParser(content, logger)));
     try {
       executor.invokeAll(tasks)
           .stream()
