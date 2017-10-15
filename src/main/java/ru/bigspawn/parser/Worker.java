@@ -38,7 +38,7 @@ public class Worker implements Runnable {
   private Bot bot;
   private Logger logger;
   private Connection connection;
-  private int newsCounter;
+  private int postedNewsCount;
   private int pageNumber = 1;
 
   public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
@@ -80,12 +80,10 @@ public class Worker implements Runnable {
       boolean isNewsRepeatedMaxTimes = false;
       for (News article : news) {
         if (article != null) {
-          if (isPosted(article)) {
-            if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
-              isNewsRepeatedMaxTimes = true;
-              logger.info("News was repeated " + newsCounter + " times!");
-              break;
-            }
+          if (isPosted(article) && postedNewsCount++ >= MAX_REPEATED_NEWS) {
+            isNewsRepeatedMaxTimes = true;
+            logger.info("News was repeated " + postedNewsCount + " times!");
+            break;
           } else {
             insetToDatabase(article);
             sendToChannel(article);
@@ -109,7 +107,7 @@ public class Worker implements Runnable {
     try {
       logger.info(message + ". Sleep " + SLEEPING_TIME + " minutes");
       pageNumber = 1;
-      newsCounter = 0;
+      postedNewsCount = 0;
       logger.debug(this);
       TimeUnit.MINUTES.sleep(SLEEPING_TIME);
     } catch (InterruptedException e) {
@@ -166,7 +164,7 @@ public class Worker implements Runnable {
         ", bot=" + bot +
         ", logger=" + logger +
         ", connection=" + connection +
-        ", newsCounter=" + newsCounter +
+        ", postedNewsCount=" + postedNewsCount +
         ", pageNumber=" + pageNumber +
         '}';
   }
