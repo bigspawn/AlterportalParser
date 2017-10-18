@@ -80,10 +80,12 @@ public class Worker implements Runnable {
       boolean isNewsRepeatedMaxTimes = false;
       for (News article : news) {
         if (article != null) {
-          if (isPosted(article) && postedNewsCount++ >= MAX_REPEATED_NEWS) {
-            isNewsRepeatedMaxTimes = true;
-            logger.info("News was repeated " + postedNewsCount + " times!");
-            break;
+          if (isPosted(article)) {
+            if (pageNumber != 1 || ++postedNewsCount >= MAX_REPEATED_NEWS) {
+              isNewsRepeatedMaxTimes = true;
+              logger.info("News was repeated " + postedNewsCount + " times!");
+              break;
+            }
           } else {
             insetToDatabase(article);
             sendToChannel(article);
