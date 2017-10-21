@@ -73,6 +73,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
         if (bodies != null && !bodies.isEmpty()) {
           HtmlElement body = bodies.get(0);
           ArrayList<String> lines = getNewsLines(body);
+          // FIXME: 21.10.2017 фигня когда возвращается одна строка
           News news = new News();
           news.setType(type);
           news.setTitle(getTitle(content));
@@ -95,7 +96,8 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   }
 
   private ArrayList<String> getNewsLines(HtmlElement body) {
-    ArrayList<String> lines = new ArrayList<>(Arrays.asList(body.asText().split("\r\n")));
+    ArrayList<String> lines = new ArrayList<>(
+        Arrays.asList(body.asText().split(System.lineSeparator())));
     lines.removeAll(Collections.singleton(""));
     return lines;
   }

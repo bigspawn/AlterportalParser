@@ -3,6 +3,7 @@ package ru.bigspawn.parser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -15,7 +16,8 @@ public class Constant {
   public static final String XPATH_NEWS_BODY_DATE = "//*[@id=\"dle-content\"]/table/tbody/tr/td/div[@class=\"slink1\"]";
   public static final String XPATH_NEWS_BODY_DIV = "//div[contains(@id, \"news-id\")]";
   public static final String DOWNLOAD_BUTTON_TEXT = "Download";
-  public static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("dd MMMM yyyy");
+  public static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("dd MMMM yyyy")
+      .withLocale(new Locale("ru"));
   public static final List<String> DOWNLOAD_RESOURCES = Collections
       .unmodifiableList(new ArrayList<String>() {
         {
