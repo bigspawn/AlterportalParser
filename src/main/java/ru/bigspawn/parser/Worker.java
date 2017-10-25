@@ -87,10 +87,14 @@ public class Worker implements Runnable {
               break;
             }
           } else {
-            insetToDatabase(article);
-            sendToChannel(article);
-            logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
-            TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
+            if (insetToDatabase(article)) {
+              sendToChannel(article);
+              logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
+              TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
+            } else {
+              logger.info("False insert into db - Sleep " + SLEEPING_TIME + " minutes");
+              TimeUnit.MINUTES.sleep(SLEEPING_TIME);
+            }
           }
         }
       }
@@ -132,7 +136,7 @@ public class Worker implements Runnable {
     return false;
   }
 
-  private void insetToDatabase(News news) {
+  private boolean insetToDatabase(News news) {
     logger.debug("Try insert new into db: " + news);
     try (PreparedStatement ps = connection.prepareStatement(INSERT_NEWS)) {
       ps.setString(1, news.getTitle());
@@ -145,9 +149,11 @@ public class Worker implements Runnable {
       ps.setString(8, news.getDownloadURL());
       ps.setString(9, news.getImageURL());
       ps.execute();
+      return true;
     } catch (SQLException e) {
       logger.error(e, e);
     }
+    return false;
   }
 
   private synchronized void sendToChannel(News news) {
