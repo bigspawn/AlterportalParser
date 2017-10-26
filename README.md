@@ -1,2 +1,3 @@
 # AlterportalParser
-Alterportal news parser
+
+Telegram parser news from Alterportal.ru
