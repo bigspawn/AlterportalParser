@@ -1,1 +1,1 @@
-START javaw -jar ./target/AlterportalParser.jar 
+START javaw -Dlog4j.configurationFile=log4j2.xml -server -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Xms128m -Xmx258m -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:"D:\Applications\AlterportalParser\gc\gc-%date%.log" -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="D:\Applications\AlterportalParser\dumps" -XX:GCLogFileSize=2M -jar AlterportalParser.jar

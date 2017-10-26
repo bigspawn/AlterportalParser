@@ -28,7 +28,8 @@ public class Worker implements Runnable {
   private static final int MAX_REPEATED_NEWS = Configuration.getInstance().getMaxRepeatedNews();
   private static final String TELEGRAM_CHANEL = Configuration.getInstance().getTelegramChanel();
   private static final String SELECT_NEWS =
-      String.format("SELECT * FROM %s WHERE title = ?", Configuration.getInstance().getDbName());
+      String.format("SELECT * FROM %s WHERE lower(title) = lower(?)",
+          Configuration.getInstance().getDbName());
   private static final String INSERT_NEWS = String.format(
       "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
           + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)",
@@ -158,7 +159,7 @@ public class Worker implements Runnable {
 
   private synchronized void sendToChannel(News news) {
     try {
-      logger.info("Try sendNews news: " + news);
+      logger.info("Send news: " + news);
       bot.sendNewsToChannel(news, TELEGRAM_CHANEL, logger);
     } catch (Exception e) {
       logger.error(e, e);

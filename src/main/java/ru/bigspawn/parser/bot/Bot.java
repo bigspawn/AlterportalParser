@@ -24,7 +24,7 @@ public class Bot extends TelegramLongPollingBot {
 
   public synchronized void sendNewsToChannel(News news, String chatId, Logger logger)
       throws Exception {
-    logger.debug("Try to send news " + news + " into channel");
+    logger.debug("Bot send news " + news + " into channel");
     if (news.getImageURL() != null) {
       sendPhotoIntoChannel(news, chatId, logger);
     }
