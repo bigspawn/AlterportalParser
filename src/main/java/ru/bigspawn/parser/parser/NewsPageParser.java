@@ -83,6 +83,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
           news.setPlaylist(getTrackList(lines));
           news.setImageURL(getImageUrl(body));
           news.setDateTime(getDateTime(content));
+          news.setPageURL(newsURL);
           if (type != NewsType.News) {
             news.setDownloadURL(getHref(body));
           }

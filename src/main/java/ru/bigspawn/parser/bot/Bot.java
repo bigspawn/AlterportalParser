@@ -1,19 +1,15 @@
 package ru.bigspawn.parser.bot;
 
-import static ru.bigspawn.parser.Constant.DOWNLOAD_BUTTON_TEXT;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.logging.log4j.Logger;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.bigspawn.parser.Configuration;
 import ru.bigspawn.parser.Main;
+import ru.bigspawn.parser.Utils;
 import ru.bigspawn.parser.entity.News;
 
 
@@ -82,19 +78,14 @@ public class Bot extends TelegramLongPollingBot {
   }
 
   private SendMessage sendNewsWithDownloadButton(String chatId, News news) {
-    InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-    List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-    List<InlineKeyboardButton> row = new ArrayList<>();
-    InlineKeyboardButton button = new InlineKeyboardButton();
-    button.setText(DOWNLOAD_BUTTON_TEXT);
-    button.setUrl(news.getDownloadURL());
-    row.add(button);
-    rows.add(row);
-    inlineKeyboardMarkup.setKeyboard(rows);
     SendMessage message = new SendMessage();
     message.setChatId(chatId);
     message.setText(news.getTextForMessage());
-    message.setReplyMarkup(inlineKeyboardMarkup);
+
+    InlineKeyboardMarkup inlineKeyboardMarkup = Utils.getInlineKeyboardMarkup(news);
+    if (!inlineKeyboardMarkup.getKeyboard().isEmpty()) {
+      message.setReplyMarkup(inlineKeyboardMarkup);
+    }
     return message;
   }
 }
