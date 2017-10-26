@@ -25,7 +25,7 @@ public class Utils {
     }
   }
 
-  public static WebClient getWebClient() {
+  public static WebClient getWebClientWithoutCSSAndJS() {
     WebClient client = new WebClient();
     client.getOptions().setCssEnabled(false);
     client.getOptions().setJavaScriptEnabled(false);

@@ -63,9 +63,8 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   }
 
   @Override
-  public News parse(NewsType type, String newsURL)
-      throws IOException {
-    try (WebClient client = Utils.getWebClient()) {
+  public News parse(NewsType type, String newsURL) {
+    try (WebClient client = Utils.getWebClientWithoutCSSAndJS()) {
       HtmlPage page = client.getPage(newsURL);
       List<HtmlElement> contents = page.getByXPath(XPATH_NEWS_CONTENT);
       if (contents != null && !contents.isEmpty()) {
@@ -74,6 +73,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
         if (bodies != null && !bodies.isEmpty()) {
           HtmlElement body = bodies.get(0);
           ArrayList<String> lines = getNewsLines(body);
+          // FIXME: 21.10.2017 фигня когда возвращается одна строка
           News news = new News();
           news.setType(type);
           news.setTitle(getTitle(content));
@@ -89,12 +89,15 @@ public class NewsPageParser implements Callable<News>, NewsParser {
           return news;
         }
       }
+    } catch (IOException e) {
+      logger.error(e, e);
     }
     return null;
   }
 
   private ArrayList<String> getNewsLines(HtmlElement body) {
-    ArrayList<String> lines = new ArrayList<>(Arrays.asList(body.asText().split("\r\n")));
+    ArrayList<String> lines = new ArrayList<>(
+        Arrays.asList(body.asText().split(System.lineSeparator())));
     lines.removeAll(Collections.singleton(""));
     return lines;
   }

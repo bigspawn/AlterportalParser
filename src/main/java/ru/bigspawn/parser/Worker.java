@@ -28,7 +28,8 @@ public class Worker implements Runnable {
   private static final int MAX_REPEATED_NEWS = Configuration.getInstance().getMaxRepeatedNews();
   private static final String TELEGRAM_CHANEL = Configuration.getInstance().getTelegramChanel();
   private static final String SELECT_NEWS =
-      String.format("SELECT * FROM %s WHERE title = ?", Configuration.getInstance().getDbName());
+      String.format("SELECT * FROM %s WHERE lower(title) = lower(?)",
+          Configuration.getInstance().getDbName());
   private static final String INSERT_NEWS = String.format(
       "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
           + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)",
@@ -38,7 +39,7 @@ public class Worker implements Runnable {
   private Bot bot;
   private Logger logger;
   private Connection connection;
-  private int newsCounter;
+  private int postedNewsCount;
   private int pageNumber = 1;
 
   public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
@@ -81,16 +82,20 @@ public class Worker implements Runnable {
       for (News article : news) {
         if (article != null) {
           if (isPosted(article)) {
-            if (pageNumber != 1 || newsCounter++ >= MAX_REPEATED_NEWS) {
+            if (pageNumber != 1 || ++postedNewsCount >= MAX_REPEATED_NEWS) {
               isNewsRepeatedMaxTimes = true;
-              logger.info("News was repeated " + newsCounter + " times!");
+              logger.info("News was repeated " + postedNewsCount + " times!");
               break;
             }
           } else {
-            insetToDatabase(article);
-            sendToChannel(article);
-            logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
-            TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
+            if (insetToDatabase(article)) {
+              sendToChannel(article);
+              logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
+              TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
+            } else {
+              logger.info("False insert into db - Sleep " + SLEEPING_TIME + " minutes");
+              TimeUnit.MINUTES.sleep(SLEEPING_TIME);
+            }
           }
         }
       }
@@ -109,7 +114,7 @@ public class Worker implements Runnable {
     try {
       logger.info(message + ". Sleep " + SLEEPING_TIME + " minutes");
       pageNumber = 1;
-      newsCounter = 0;
+      postedNewsCount = 0;
       logger.debug(this);
       TimeUnit.MINUTES.sleep(SLEEPING_TIME);
     } catch (InterruptedException e) {
@@ -132,7 +137,7 @@ public class Worker implements Runnable {
     return false;
   }
 
-  private void insetToDatabase(News news) {
+  private boolean insetToDatabase(News news) {
     logger.debug("Try insert new into db: " + news);
     try (PreparedStatement ps = connection.prepareStatement(INSERT_NEWS)) {
       ps.setString(1, news.getTitle());
@@ -145,14 +150,16 @@ public class Worker implements Runnable {
       ps.setString(8, news.getDownloadURL());
       ps.setString(9, news.getImageURL());
       ps.execute();
+      return true;
     } catch (SQLException e) {
       logger.error(e, e);
     }
+    return false;
   }
 
   private synchronized void sendToChannel(News news) {
     try {
-      logger.info("Try sendNews news: " + news);
+      logger.info("Send news: " + news);
       bot.sendNewsToChannel(news, TELEGRAM_CHANEL, logger);
     } catch (Exception e) {
       logger.error(e, e);
@@ -166,7 +173,7 @@ public class Worker implements Runnable {
         ", bot=" + bot +
         ", logger=" + logger +
         ", connection=" + connection +
-        ", newsCounter=" + newsCounter +
+        ", postedNewsCount=" + postedNewsCount +
         ", pageNumber=" + pageNumber +
         '}';
   }

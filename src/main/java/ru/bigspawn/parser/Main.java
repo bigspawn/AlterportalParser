@@ -27,6 +27,7 @@ public class Main {
   public static void main(String[] args) {
     try {
       logger.info("Start application");
+      logger.info(System.getProperties().get("log4j.configurationFile"));
       ApiContextInitializer.init();
       TelegramBotsApi botsApi = new TelegramBotsApi();
       Bot bot = new Bot();

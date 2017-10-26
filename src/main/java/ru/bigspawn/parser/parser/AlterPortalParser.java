@@ -30,17 +30,20 @@ public class AlterPortalParser implements Parser {
   }
 
   @Override
-  public List<News> parse(int pageNumber) throws IOException {
+  public List<News> parse(int pageNumber) throws UnsupportedEncodingException {
     String pageURL = getPageURL(pageNumber);
     logger.info("Start parsing news from " + pageURL);
-    try (WebClient client = Utils.getWebClient()) {
+    try (WebClient client = Utils.getWebClientWithoutCSSAndJS()) {
       HtmlPage page = client.getPage(pageURL);
       if (page.getBaseURL().getFile().contains("cgi-sys/suspendedpage.cgi")) {
         logger.error("Site is unavailable! Page: " + page.getBaseURL());
         return null;
       }
       return getNews(page);
+    } catch (IOException e) {
+      logger.error(e, e);
     }
+    return null;
   }
 
   private String getPageURL(int pageNumber) throws UnsupportedEncodingException {

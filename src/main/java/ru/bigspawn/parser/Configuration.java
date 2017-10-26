@@ -4,6 +4,8 @@ import static ru.bigspawn.parser.Main.logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.ini4j.Config;
@@ -51,7 +53,9 @@ public class Configuration {
   }
 
   private void initConfigs() throws IOException {
-    Ini ini = new Ini(new File("settings.ini"));
+    Path path = Paths.get(System.getProperty("settings.path"));
+    File input = new File(path.toUri());
+    Ini ini = new Ini(input);
     setIniConfigurations(ini);
     Ini.Section section = ini.get(SELECTION_URL);
     String[] pagesStr = section.getAll("PAGE", String[].class);
