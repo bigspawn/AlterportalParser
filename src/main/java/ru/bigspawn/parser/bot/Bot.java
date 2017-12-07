@@ -1,5 +1,9 @@
 package ru.bigspawn.parser.bot;
 
+import java.io.IOException;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.logging.log4j.Logger;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
@@ -18,8 +22,7 @@ import ru.bigspawn.parser.entity.News;
  */
 public class Bot extends TelegramLongPollingBot {
 
-  public synchronized void sendNewsToChannel(News news, String chatId, Logger logger)
-      throws Exception {
+  public synchronized void sendNewsToChannel(News news, String chatId, Logger logger) {
     logger.debug("Bot send news " + news + " into channel");
     if (news.getImageURL() != null) {
       sendPhotoIntoChannel(news, chatId, logger);
@@ -40,7 +43,28 @@ public class Bot extends TelegramLongPollingBot {
       sendPhoto(sendPhotoRequest);
     } catch (TelegramApiException e) {
       logger.error(e, e);
-      //todo как то вытаскивать картинки
+      sendDownloadedImage(news, chatId, logger);
+    }
+  }
+
+  private void sendDownloadedImage(News news, String chatId, Logger logger) {
+    OkHttpClient client = new OkHttpClient();
+    Request request = new Request.Builder().url(news.getImageURL()).build();
+    Response response;
+    try {
+      response = client.newCall(request).execute();
+      logger.info("Get response: " + response);
+      if (!response.isSuccessful()) {
+        throw new IOException("Failed to download file: " + response);
+      }
+      if (response.body() != null) {
+        SendPhoto sendPhotoRequest = new SendPhoto();
+        sendPhotoRequest.setChatId(chatId);
+        sendPhotoRequest.setNewPhoto(news.getTitle(), response.body().byteStream());
+        sendPhoto(sendPhotoRequest);
+      }
+    } catch (IOException | TelegramApiException e) {
+      logger.error(e, e);
     }
   }
 
@@ -49,7 +73,8 @@ public class Bot extends TelegramLongPollingBot {
       if (news.getDownloadURL() != null && !news.getDownloadURL().isEmpty()) {
         sendMessage(sendNewsWithDownloadButton(chatId, news));
       } else {
-        sendMessage(new SendMessage(chatId, news.getTextForMessage()));
+//        sendMessage(new SendMessage(chatId, news.getTextForMessage()));
+        logger.error("News with empty download url! " + news);
       }
       logger.info("Send news: " + news.getTitle() + " to channel");
     } catch (TelegramApiException e) {

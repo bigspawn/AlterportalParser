@@ -126,9 +126,9 @@ public class News {
   public String getTextForMessage() {
     StringBuilder builder = new StringBuilder();
     builder.append(title).append('\n').append("Категория: ").append(type).append('\n');
-    if (type == NewsType.News) {
-      builder.append("\n");
-    }
+//    if (type == NewsType.News) {
+//      builder.append("\n");
+//    }
     Utils.appendIfNotNPE(builder, genre, format, country);
     builder.append("Дата: ").append(Constant.FORMATTER.print(dateTime)).append('\n');
     Utils.appendIfNotNPE(builder, "Плейлист: ", playlist);
