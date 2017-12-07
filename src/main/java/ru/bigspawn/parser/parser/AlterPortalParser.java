@@ -23,8 +23,7 @@ public class AlterPortalParser implements Parser {
   private String pageUrl;
   private Logger logger;
 
-  public AlterPortalParser(String pageUrl)
-      throws UnsupportedEncodingException {
+  public AlterPortalParser(String pageUrl) {
     this.pageUrl = pageUrl;
     this.logger = LogManager.getLogger(Utils.getLoggerNameFromUrl(pageUrl));
   }

@@ -4,7 +4,7 @@ package ru.bigspawn.parser.entity;
  * Created by bigspawn on 31.05.2017.
  */
 public enum NewsType {
-  News("Новости"),
+  //  News("Новости"),
   Albums("Альбомы 2017"),
   Alternative("Alternative"),
   Punk("Punk"),

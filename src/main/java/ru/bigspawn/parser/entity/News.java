@@ -18,6 +18,7 @@ public class News {
   private String playlist;
   private String downloadURL;
   private String imageURL;
+  private String pageURL;
 
   public News() {
   }
@@ -28,7 +29,8 @@ public class News {
   }
 
   public News(String title, NewsType type, DateTime dateTime, String genre, String format,
-      String country, String playlist, String downloadURL, String imageURL) {
+      String country, String playlist, String downloadURL, String imageURL,
+      String pageURL) {
     this.title = title;
     this.type = type;
     this.dateTime = dateTime;
@@ -38,6 +40,7 @@ public class News {
     this.playlist = playlist;
     this.downloadURL = downloadURL;
     this.imageURL = imageURL;
+    this.pageURL = pageURL;
   }
 
   public String getTitle() {
@@ -112,12 +115,20 @@ public class News {
     this.downloadURL = downloadURL;
   }
 
+  public String getPageURL() {
+    return pageURL;
+  }
+
+  public void setPageURL(String pageURL) {
+    this.pageURL = pageURL;
+  }
+
   public String getTextForMessage() {
     StringBuilder builder = new StringBuilder();
     builder.append(title).append('\n').append("Категория: ").append(type).append('\n');
-    if (type == NewsType.News) {
-      builder.append("\n");
-    }
+//    if (type == NewsType.News) {
+//      builder.append("\n");
+//    }
     Utils.appendIfNotNPE(builder, genre, format, country);
     builder.append("Дата: ").append(Constant.FORMATTER.print(dateTime)).append('\n');
     Utils.appendIfNotNPE(builder, "Плейлист: ", playlist);
@@ -160,7 +171,10 @@ public class News {
     if (downloadURL != null ? !downloadURL.equals(news.downloadURL) : news.downloadURL != null) {
       return false;
     }
-    return imageURL != null ? imageURL.equals(news.imageURL) : news.imageURL == null;
+    if (imageURL != null ? imageURL.equals(news.imageURL) : news.imageURL == null) {
+      return false;
+    }
+    return pageURL != null ? pageURL.equals(news.pageURL) : news.pageURL == null;
   }
 
   @Override
@@ -174,6 +188,7 @@ public class News {
     result = 31 * result + playlist.hashCode();
     result = 31 * result + (downloadURL != null ? downloadURL.hashCode() : 0);
     result = 31 * result + (imageURL != null ? imageURL.hashCode() : 0);
+    result = 31 * result + (pageURL != null ? pageURL.hashCode() : 0);
     return result;
   }
 
@@ -188,6 +203,7 @@ public class News {
         .append("', country='").append(country)
         .append("', playlist='").append(playlist.replace('\n', ','))
         .append("', downloadURL='").append(downloadURL)
-        .append("', imageURL='").append(imageURL).append("'}").toString();
+        .append("', imageURL='").append(imageURL)
+        .append("', pageURL='").append(imageURL).append("'}").toString();
   }
 }

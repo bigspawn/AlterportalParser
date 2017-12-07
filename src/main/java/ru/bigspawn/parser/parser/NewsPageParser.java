@@ -36,7 +36,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   }
 
   @Override
-  public News call() throws Exception {
+  public News call() {
     List<HtmlElement> categories = content.getElementsByAttribute("td", "class", "category");
     if (categories != null && !categories.isEmpty()) {
       String category = categories.get(0).asText().trim();
@@ -83,9 +83,10 @@ public class NewsPageParser implements Callable<News>, NewsParser {
           news.setPlaylist(getTrackList(lines));
           news.setImageURL(getImageUrl(body));
           news.setDateTime(getDateTime(content));
-          if (type != NewsType.News) {
-            news.setDownloadURL(getHref(body));
-          }
+          news.setPageURL(newsURL);
+          news.setDownloadURL(getHref(body));
+//          if (type != NewsType.News) {
+//          }
           return news;
         }
       }

@@ -31,8 +31,8 @@ public class Worker implements Runnable {
       String.format("SELECT * FROM %s WHERE lower(title) = lower(?)",
           Configuration.getInstance().getDbName());
   private static final String INSERT_NEWS = String.format(
-      "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url) "
-          + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url, page_url) "
+          + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?, ?)",
       Configuration.getInstance().getDbName());
 
   private Parser parser;
@@ -149,6 +149,7 @@ public class Worker implements Runnable {
       ps.setString(7, news.getPlaylist());
       ps.setString(8, news.getDownloadURL());
       ps.setString(9, news.getImageURL());
+      ps.setString(10, news.getPageURL());
       ps.execute();
       return true;
     } catch (SQLException e) {
