@@ -1,6 +1,7 @@
 package ru.bigspawn.parser.bot;
 
 import java.io.IOException;
+import java.util.Objects;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -24,12 +25,14 @@ public class Bot extends TelegramLongPollingBot {
 
   public synchronized void sendNewsToChannel(News news, String chatId, Logger logger) {
     logger.debug("Bot send news " + news + " into channel");
-    if (news.getImageURL() != null) {
-      sendPhotoIntoChannel(news, chatId, logger);
-    }
     String textForMessage = news.getTextForMessage();
-    if (textForMessage != null && !textForMessage.isEmpty()) {
-      sendMessageToChannel(chatId, news, logger);
+    if (news.getImageURL() != null && textForMessage != null && !textForMessage.isEmpty()) {
+      if (news.getDownloadURL() != null && !news.getDownloadURL().isEmpty()) {
+        sendPhotoIntoChannel(news, chatId, logger);
+        sendMessageToChannel(chatId, news, logger);
+      } else {
+        logger.error("News with empty download url! " + news);
+      }
     }
   }
 
@@ -60,7 +63,8 @@ public class Bot extends TelegramLongPollingBot {
       if (response.body() != null) {
         SendPhoto sendPhotoRequest = new SendPhoto();
         sendPhotoRequest.setChatId(chatId);
-        sendPhotoRequest.setNewPhoto(news.getTitle(), response.body().byteStream());
+        sendPhotoRequest
+            .setNewPhoto(news.getTitle(), Objects.requireNonNull(response.body()).byteStream());
         sendPhoto(sendPhotoRequest);
       }
     } catch (IOException | TelegramApiException e) {
@@ -70,12 +74,7 @@ public class Bot extends TelegramLongPollingBot {
 
   private void sendMessageToChannel(String chatId, News news, Logger logger) {
     try {
-      if (news.getDownloadURL() != null && !news.getDownloadURL().isEmpty()) {
-        sendMessage(sendNewsWithDownloadButton(chatId, news));
-      } else {
-//        sendMessage(new SendMessage(chatId, news.getTextForMessage()));
-        logger.error("News with empty download url! " + news);
-      }
+      sendMessage(sendNewsWithDownloadButton(chatId, news));
       logger.info("Send news: " + news.getTitle() + " to channel");
     } catch (TelegramApiException e) {
       logger.error(e, e);

@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import ru.bigspawn.parser.Constant;
@@ -117,7 +116,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
 
   private void findNewsTag(ArrayList<String> lines, StringBuilder builder, String tag) {
     Optional<String> first = lines.stream()
-        .filter(line -> StringUtils.containsIgnoreCase(line, tag))
+        .filter(line -> line.toLowerCase().contains(tag.toLowerCase()))
         .findFirst();
     first.ifPresent(builder::append);
   }
@@ -145,9 +144,9 @@ public class NewsPageParser implements Callable<News>, NewsParser {
     List<HtmlElement> dateElements = content.getByXPath(XPATH_NEWS_BODY_DATE);
     if (dateElements != null && !dateElements.isEmpty()) {
       String date = dateElements.get(0).getTextContent().trim();
-      if (StringUtils.contains(date, "Вчера")) {
+      if (date.contains("Вчера")) {
         dateTime = dateTime.minusDays(1);
-      } else if (!StringUtils.contains(date, "Сегодня")) {
+      } else if (!date.contains("Сегодня")) {
         Pattern pattern = Pattern.compile("\\|\\s.*");
         Matcher matcher = pattern.matcher(date);
         if (matcher.find()) {
@@ -163,8 +162,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   private String getTrackList(ArrayList<String> lines) {
     StringBuilder tracks = new StringBuilder("");
     for (int i = 0; i < lines.size(); i++) {
-      if (StringUtils.contains(lines.get(i), "Треклист")
-          || StringUtils.contains(lines.get(i), "Tracklist")) {
+      if (lines.get(i).contains("Треклист") || lines.get(i).contains("Tracklist")) {
         for (int j = i + 1; j < lines.size(); j++) {
           String track = lines.get(j).trim();
           if (Character.isDigit(track.charAt(0))) {
