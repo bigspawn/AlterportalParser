@@ -40,7 +40,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
     if (categories != null && !categories.isEmpty()) {
       String category = categories.get(0).asText().trim();
       Optional<NewsType> optional = Arrays.stream(NewsType.values())
-          .filter(c -> category.equals(c.getName()))
+          .filter(c -> category.equals(c.getName()) || category.contains(c.getName()))
           .findFirst();
       if (optional.isPresent()) {
         logger.debug("News category: " + category);

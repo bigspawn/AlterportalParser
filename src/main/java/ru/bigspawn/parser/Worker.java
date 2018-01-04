@@ -2,7 +2,6 @@ package ru.bigspawn.parser;
 
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -42,7 +41,7 @@ public class Worker implements Runnable {
   private int postedNewsCount;
   private int pageNumber = 1;
 
-  public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
+  public Worker(Parser parser, Bot bot, String loggerName) {
     this.parser = parser;
     this.bot = bot;
     this.logger = LogManager.getLogger(loggerName);
