@@ -1,4 +1,4 @@
-package ru.bigspawn.parser.parser;
+package ru.bigspawn.parser.parser.news;
 
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DATE;
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DIV;
@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.joda.time.DateTime;
 import ru.bigspawn.parser.Constant;
 import ru.bigspawn.parser.Utils;
@@ -98,7 +99,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   private ArrayList<String> getNewsLines(HtmlElement body) {
     ArrayList<String> lines = new ArrayList<>(
         Arrays.asList(body.asText().split(System.lineSeparator())));
-    lines.removeAll(Collections.singleton(""));
+    lines.removeAll(Collections.singleton(Strings.EMPTY));
     return lines;
   }
 
@@ -126,17 +127,17 @@ public class NewsPageParser implements Callable<News>, NewsParser {
     if (titles != null && !titles.isEmpty()) {
       return titles.get(0).getTextContent();
     }
-    return "";
+    return Strings.EMPTY;
   }
 
   private String replaceUnnecessarySymbols(String tag) {
     if (tag != null && !tag.isEmpty()) {
       return tag.replaceAll(":: ::", ":")
-          .replaceAll("::", "")
-          .replace(". Кач-во", "")
+          .replaceAll("::", Strings.EMPTY)
+          .replace(". Кач-во", Strings.EMPTY)
           .trim();
     }
-    return "";
+    return Strings.EMPTY;
   }
 
   private DateTime getDateTime(HtmlElement content) {
@@ -151,7 +152,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
         Matcher matcher = pattern.matcher(date);
         if (matcher.find()) {
           date = matcher.group();
-          date = date.replace("|", "").trim();
+          date = date.replace("|", Strings.EMPTY).trim();
           dateTime = Constant.FORMATTER.parseDateTime(date);
         }
       }
@@ -160,7 +161,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   }
 
   private String getTrackList(ArrayList<String> lines) {
-    StringBuilder tracks = new StringBuilder("");
+    StringBuilder tracks = new StringBuilder();
     for (int i = 0; i < lines.size(); i++) {
       if (lines.get(i).contains("Треклист") || lines.get(i).contains("Tracklist")) {
         for (int j = i + 1; j < lines.size(); j++) {
@@ -197,7 +198,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
         return imageElement.getAttribute("src");
       }
     }
-    return "";
+    return Strings.EMPTY;
   }
 
   private String getHref(HtmlElement body) {
@@ -210,6 +211,6 @@ public class NewsPageParser implements Callable<News>, NewsParser {
         }
       }
     }
-    return "";
+    return Strings.EMPTY;
   }
 }

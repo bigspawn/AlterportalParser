@@ -52,7 +52,8 @@ public class Worker implements Runnable {
     connection = DriverManager.getConnection(
         Configuration.getInstance().getDbUrl(),
         Configuration.getInstance().getDbUser(),
-        Configuration.getInstance().getDbPassword());
+        Configuration.getInstance().getDbPassword()
+    );
   }
 
   @Override
@@ -88,6 +89,7 @@ public class Worker implements Runnable {
             }
           } else {
             if (insetToDatabase(article)) {
+              //todo: доделать - если не отправилось но есть в БД - надо или перепарсить или заново оправить
               sendToChannel(article);
               logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
               TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);

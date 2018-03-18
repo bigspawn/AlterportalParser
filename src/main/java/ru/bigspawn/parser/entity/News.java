@@ -125,10 +125,8 @@ public class News {
 
   public String getTextForMessage() {
     StringBuilder builder = new StringBuilder();
-    builder.append(title).append('\n').append("Категория: ").append(type).append('\n');
-//    if (type == NewsType.News) {
-//      builder.append("\n");
-//    }
+    builder.append(title).append('\n')
+        .append("Категория: ").append(type).append('\n');
     Utils.appendIfNotNPE(builder, genre, format, country);
     builder.append("Дата: ").append(Constant.FORMATTER.print(dateTime)).append('\n');
     Utils.appendIfNotNPE(builder, "Плейлист: ", playlist);
@@ -194,16 +192,9 @@ public class News {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    return sb.append("News{title='").append(title)
-        .append("', type='").append(type)
-        .append("', dateTime=").append(dateTime)
-        .append(", genre='").append(genre)
-        .append("', format='").append(format)
-        .append("', country='").append(country)
-        .append("', playlist='").append(playlist.replace('\n', ','))
-        .append("', downloadURL='").append(downloadURL)
-        .append("', imageURL='").append(imageURL)
-        .append("', pageURL='").append(imageURL).append("'}").toString();
+    return String.format(
+        "News{title='%s', type='%s', dateTime=%s, genre='%s', format='%s', country='%s', playlist='%s', downloadURL='%s', imageURL='%s', pageURL='%s'}",
+        title, type, dateTime, genre, format, country, playlist.replace('\n', ','), downloadURL,
+        imageURL, imageURL);
   }
 }

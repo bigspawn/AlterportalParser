@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.bigspawn.parser.Utils;
 import ru.bigspawn.parser.entity.News;
+import ru.bigspawn.parser.parser.news.NewsPageParser;
 
 public class AlterPortalParser implements Parser {
 

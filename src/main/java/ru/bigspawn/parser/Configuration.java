@@ -42,16 +42,6 @@ public class Configuration {
     }
   }
 
-  private static void setIniConfigurations(Ini ini) {
-    Config conf = new Config();
-    conf.setMultiOption(true);
-    ini.setConfig(conf);
-  }
-
-  public static Configuration getInstance() {
-    return instance;
-  }
-
   private void initConfigs() throws IOException {
     Path path = Paths.get(System.getProperty("settings.path"));
     File input = new File(path.toUri());
@@ -74,6 +64,16 @@ public class Configuration {
     setMaxRepeatedNews(Integer.parseInt(ini.get(SECTION_PARSER, "MAX_REPEATED_NEWS")));
     setThreads(Integer.parseInt(ini.get(SECTION_PARSER, "THREADS_COUNT")));
     logger.info("Init configurations " + this);
+  }
+
+  private static void setIniConfigurations(Ini ini) {
+    Config conf = new Config();
+    conf.setMultiOption(true);
+    ini.setConfig(conf);
+  }
+
+  public static Configuration getInstance() {
+    return instance;
   }
 
   public ArrayList<String> getUrls() {
@@ -174,19 +174,9 @@ public class Configuration {
 
   @Override
   public String toString() {
-    return "Configuration{" +
-        "urls=" + urls +
-        ", telegramChanel='" + telegramChanel + '\'' +
-        ", telegramBot='" + telegramBot + '\'' +
-        ", telegramBotName='" + telegramBotName + '\'' +
-        ", dbUrl='" + dbUrl + '\'' +
-        ", dbUser='" + dbUser + '\'' +
-        ", dbPassword='" + dbPassword + '\'' +
-        ", dbName='" + dbName + '\'' +
-        ", sleepingTime=" + sleepingTime + '\'' +
-        ", sleepingTimeForNews=" + sleepingTimeForNews + '\'' +
-        ", maxRepeatedNews=" + maxRepeatedNews + '\'' +
-        ", threads=" + threads +
-        '}';
+    return String.format(
+        "Configuration{urls=%s, telegramChanel='%s', telegramBot='%s', telegramBotName='%s', dbUrl='%s', dbUser='%s', dbPassword='%s', dbName='%s', sleepingTime=%d', sleepingTimeForNews=%d', maxRepeatedNews=%d', threads=%d}",
+        urls, telegramChanel, telegramBot, telegramBotName, dbUrl, dbUser, dbPassword, dbName,
+        sleepingTime, sleepingTimeForNews, maxRepeatedNews, threads);
   }
 }

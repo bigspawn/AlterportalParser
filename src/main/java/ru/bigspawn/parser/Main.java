@@ -1,7 +1,5 @@
 package ru.bigspawn.parser;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -33,13 +31,12 @@ public class Main {
       Bot bot = new Bot();
       botsApi.registerBot(bot);
       startWorkers(bot);
-    } catch (IOException | TelegramApiRequestException | InterruptedException e) {
+    } catch (TelegramApiRequestException | InterruptedException e) {
       logger.error(e, e);
     }
   }
 
-  private static void startWorkers(Bot bot)
-      throws UnsupportedEncodingException, InterruptedException {
+  private static void startWorkers(Bot bot) throws InterruptedException {
     List<String> urls = Configuration.getInstance().getUrls();
     logger.info("Start workers " + urls.size() + " - " + Arrays.toString(urls.toArray()));
     for (String url : urls) {
@@ -48,7 +45,7 @@ public class Main {
     }
   }
 
-  private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {
+  private static void startWorker(Bot bot, String url) {
     AlterPortalParser parser = new AlterPortalParser(url);
     String loggerName = Utils.getLoggerNameFromUrl(url);
     Worker worker = new Worker(parser, bot, loggerName);
