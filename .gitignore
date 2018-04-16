@@ -3,4 +3,4 @@
 logs/
 settings.ini
 target/
-/images/
+lib/

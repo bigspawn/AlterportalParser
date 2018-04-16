@@ -1,4 +1,4 @@
-package ru.bigspawn.parser.parser;
+package ru.bigspawn.parser.parser.news;
 
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DATE;
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DIV;
@@ -17,8 +17,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.joda.time.DateTime;
 import ru.bigspawn.parser.Constant;
 import ru.bigspawn.parser.Utils;
@@ -41,7 +41,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
     if (categories != null && !categories.isEmpty()) {
       String category = categories.get(0).asText().trim();
       Optional<NewsType> optional = Arrays.stream(NewsType.values())
-          .filter(c -> category.equals(c.getName()))
+          .filter(c -> category.equals(c.getName()) || category.contains(c.getName()))
           .findFirst();
       if (optional.isPresent()) {
         logger.debug("News category: " + category);
@@ -99,7 +99,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   private ArrayList<String> getNewsLines(HtmlElement body) {
     ArrayList<String> lines = new ArrayList<>(
         Arrays.asList(body.asText().split(System.lineSeparator())));
-    lines.removeAll(Collections.singleton(""));
+    lines.removeAll(Collections.singleton(Strings.EMPTY));
     return lines;
   }
 
@@ -117,7 +117,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
 
   private void findNewsTag(ArrayList<String> lines, StringBuilder builder, String tag) {
     Optional<String> first = lines.stream()
-        .filter(line -> StringUtils.containsIgnoreCase(line, tag))
+        .filter(line -> line.toLowerCase().contains(tag.toLowerCase()))
         .findFirst();
     first.ifPresent(builder::append);
   }
@@ -127,17 +127,17 @@ public class NewsPageParser implements Callable<News>, NewsParser {
     if (titles != null && !titles.isEmpty()) {
       return titles.get(0).getTextContent();
     }
-    return "";
+    return Strings.EMPTY;
   }
 
   private String replaceUnnecessarySymbols(String tag) {
     if (tag != null && !tag.isEmpty()) {
       return tag.replaceAll(":: ::", ":")
-          .replaceAll("::", "")
-          .replace(". Кач-во", "")
+          .replaceAll("::", Strings.EMPTY)
+          .replace(". Кач-во", Strings.EMPTY)
           .trim();
     }
-    return "";
+    return Strings.EMPTY;
   }
 
   private DateTime getDateTime(HtmlElement content) {
@@ -145,14 +145,14 @@ public class NewsPageParser implements Callable<News>, NewsParser {
     List<HtmlElement> dateElements = content.getByXPath(XPATH_NEWS_BODY_DATE);
     if (dateElements != null && !dateElements.isEmpty()) {
       String date = dateElements.get(0).getTextContent().trim();
-      if (StringUtils.contains(date, "Вчера")) {
+      if (date.contains("Вчера")) {
         dateTime = dateTime.minusDays(1);
-      } else if (!StringUtils.contains(date, "Сегодня")) {
+      } else if (!date.contains("Сегодня")) {
         Pattern pattern = Pattern.compile("\\|\\s.*");
         Matcher matcher = pattern.matcher(date);
         if (matcher.find()) {
           date = matcher.group();
-          date = date.replace("|", "").trim();
+          date = date.replace("|", Strings.EMPTY).trim();
           dateTime = Constant.FORMATTER.parseDateTime(date);
         }
       }
@@ -161,10 +161,9 @@ public class NewsPageParser implements Callable<News>, NewsParser {
   }
 
   private String getTrackList(ArrayList<String> lines) {
-    StringBuilder tracks = new StringBuilder("");
+    StringBuilder tracks = new StringBuilder();
     for (int i = 0; i < lines.size(); i++) {
-      if (StringUtils.contains(lines.get(i), "Треклист")
-          || StringUtils.contains(lines.get(i), "Tracklist")) {
+      if (lines.get(i).contains("Треклист") || lines.get(i).contains("Tracklist")) {
         for (int j = i + 1; j < lines.size(); j++) {
           String track = lines.get(j).trim();
           if (Character.isDigit(track.charAt(0))) {
@@ -199,7 +198,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
         return imageElement.getAttribute("src");
       }
     }
-    return "";
+    return Strings.EMPTY;
   }
 
   private String getHref(HtmlElement body) {
@@ -212,6 +211,6 @@ public class NewsPageParser implements Callable<News>, NewsParser {
         }
       }
     }
-    return "";
+    return Strings.EMPTY;
   }
 }

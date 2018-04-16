@@ -5,7 +5,7 @@ package ru.bigspawn.parser.entity;
  */
 public enum NewsType {
   //  News("Новости"),
-  Albums("Альбомы 2017"),
+  Albums("Альбомы"),
   Alternative("Alternative"),
   Punk("Punk"),
   Hardcore("Emo / Hardcore"),

@@ -33,6 +33,8 @@ public class Configuration {
   private int sleepingTimeForNews;
   private int maxRepeatedNews;
   private int threads;
+  private String proxyHost;
+  private int proxyPort;
 
   private Configuration() {
     try {
@@ -64,15 +66,16 @@ public class Configuration {
     setTelegramBot(ini.get(SECTION_BOT, "TELEGRAM_BOT"));
     setTelegramBotName(ini.get(SECTION_BOT, "TELEGRAM_BOT_NAME"));
     setTelegramChanel(ini.get(SECTION_BOT, "TELEGRAM_CHANEL"));
+    setProxyHost(ini.get(SECTION_BOT, "PROXY_HOST"));
+    setProxyPort(Integer.valueOf(ini.get(SECTION_BOT, "PROXY_PORT")));
     setDbUrl(ini.get(SECTION_PARSER, "DB_URL"));
     setDbUser(ini.get(SECTION_PARSER, "DB_USER"));
     setDbPassword(ini.get(SECTION_PARSER, "DB_PASSWD"));
     setDbName(ini.get(SECTION_PARSER, "DB_NAME"));
-    setSleepingTime(Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME")));
-    setSleepingTimeForNews(
-        Integer.parseInt(ini.get(SECTION_PARSER, "SLEEPING_TIME_FOR_NEWS")));
-    setMaxRepeatedNews(Integer.parseInt(ini.get(SECTION_PARSER, "MAX_REPEATED_NEWS")));
-    setThreads(Integer.parseInt(ini.get(SECTION_PARSER, "THREADS_COUNT")));
+    setSleepingTime(Integer.valueOf(ini.get(SECTION_PARSER, "SLEEPING_TIME")));
+    setSleepingTimeForNews(Integer.valueOf(ini.get(SECTION_PARSER, "SLEEPING_TIME_FOR_NEWS")));
+    setMaxRepeatedNews(Integer.valueOf(ini.get(SECTION_PARSER, "MAX_REPEATED_NEWS")));
+    setThreads(Integer.valueOf(ini.get(SECTION_PARSER, "THREADS_COUNT")));
     logger.info("Init configurations " + this);
   }
 
@@ -172,21 +175,27 @@ public class Configuration {
     this.threads = threads;
   }
 
+  public String getProxyHost() {
+    return proxyHost;
+  }
+
+  public void setProxyHost(String proxyHost) {
+    this.proxyHost = proxyHost;
+  }
+
+  public int getProxyPort() {
+    return proxyPort;
+  }
+
+  public void setProxyPort(int proxyPort) {
+    this.proxyPort = proxyPort;
+  }
+
   @Override
   public String toString() {
-    return "Configuration{" +
-        "urls=" + urls +
-        ", telegramChanel='" + telegramChanel + '\'' +
-        ", telegramBot='" + telegramBot + '\'' +
-        ", telegramBotName='" + telegramBotName + '\'' +
-        ", dbUrl='" + dbUrl + '\'' +
-        ", dbUser='" + dbUser + '\'' +
-        ", dbPassword='" + dbPassword + '\'' +
-        ", dbName='" + dbName + '\'' +
-        ", sleepingTime=" + sleepingTime + '\'' +
-        ", sleepingTimeForNews=" + sleepingTimeForNews + '\'' +
-        ", maxRepeatedNews=" + maxRepeatedNews + '\'' +
-        ", threads=" + threads +
-        '}';
+    return String.format(
+        "Configuration{urls=%s, telegramChanel='%s', telegramBot='%s', telegramBotName='%s', dbUrl='%s', dbUser='%s', dbPassword='%s', dbName='%s', sleepingTime=%d', sleepingTimeForNews=%d', maxRepeatedNews=%d', threads=%d}",
+        urls, telegramChanel, telegramBot, telegramBotName, dbUrl, dbUser, dbPassword, dbName,
+        sleepingTime, sleepingTimeForNews, maxRepeatedNews, threads);
   }
 }

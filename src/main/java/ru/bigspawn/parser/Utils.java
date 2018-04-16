@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.logging.log4j.util.Strings;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.bigspawn.parser.entity.News;
@@ -18,7 +19,7 @@ public class Utils {
     Pattern pattern = Pattern.compile("/(\\w+)/");
     Matcher matcher = pattern.matcher(url);
     if (matcher.find()) {
-      return matcher.group().replaceAll("/", "");
+      return matcher.group().replaceAll("/", Strings.EMPTY);
     }
     return url;
   }

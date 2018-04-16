@@ -1,16 +1,18 @@
 package ru.bigspawn.parser;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.telegram.telegrambots.ApiContext;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import ru.bigspawn.parser.bot.Bot;
 import ru.bigspawn.parser.parser.AlterPortalParser;
@@ -28,27 +30,41 @@ public class Main {
     try {
       logger.info("Start application");
       logger.info(System.getProperties().get("log4j.configurationFile"));
+      Class.forName("org.postgresql.Driver");
       ApiContextInitializer.init();
-      TelegramBotsApi botsApi = new TelegramBotsApi();
-      Bot bot = new Bot();
-      botsApi.registerBot(bot);
+      Bot bot = getTelegramBot();
       startWorkers(bot);
-    } catch (IOException | TelegramApiRequestException | InterruptedException e) {
+    } catch (ClassNotFoundException | TelegramApiRequestException | InterruptedException e) {
       logger.error(e, e);
     }
   }
 
-  private static void startWorkers(Bot bot)
-      throws UnsupportedEncodingException, InterruptedException {
+  private static Bot getTelegramBot() throws TelegramApiRequestException {
+    RequestConfig requestConfig = RequestConfig.copy(RequestConfig.custom().build())
+        .setProxy(
+            new HttpHost(
+                Configuration.getInstance().getProxyHost(),
+                Configuration.getInstance().getProxyPort()))
+        .build();
+    DefaultBotOptions instance = ApiContext.getInstance(DefaultBotOptions.class);
+    instance.setRequestConfig(requestConfig);
+    Bot bot = new Bot(instance);
+    TelegramBotsApi botsApi = new TelegramBotsApi();
+    botsApi.registerBot(bot);
+    return bot;
+  }
+
+  private static void startWorkers(Bot bot) throws InterruptedException {
     List<String> urls = Configuration.getInstance().getUrls();
-    logger.info("Start workers " + urls.size() + " - " + Arrays.toString(urls.toArray()));
+    logger
+        .info(String.format("Start workers %d - %s", urls.size(), Arrays.toString(urls.toArray())));
     for (String url : urls) {
       startWorker(bot, url);
       TimeUnit.SECONDS.sleep(10);
     }
   }
 
-  private static void startWorker(Bot bot, String url) throws UnsupportedEncodingException {
+  private static void startWorker(Bot bot, String url) {
     AlterPortalParser parser = new AlterPortalParser(url);
     String loggerName = Utils.getLoggerNameFromUrl(url);
     Worker worker = new Worker(parser, bot, loggerName);

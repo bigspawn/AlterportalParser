@@ -16,7 +16,8 @@ import javax.imageio.ImageIO;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.jupiter.api.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class JsExecTest {
 
@@ -24,6 +25,7 @@ public class JsExecTest {
   public static final String IMAGE_URL2 = "https://1.bp.blogspot.com/-5bPNsF5plzw/VnJWs-7RbrI/AAAAAAAARmA/DaZmn8YUjAk/s1600-r/logo_research_at_google_color_1x_web_512dp.png";
 
   @Test
+  @Ignore
   public void test() {
 
     try (WebClient webClient = new WebClient(BrowserVersion.FIREFOX_52)) {
@@ -47,6 +49,7 @@ public class JsExecTest {
   }
 
   @Test
+  @Ignore
   public void httpTest() throws IOException {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder().url(IMAGE_URL).build();
@@ -60,6 +63,7 @@ public class JsExecTest {
   }
 
   @Test
+  @Ignore
   public void downloadFile() throws IOException {
     String destinationFile = "image.jpg";
     URL url = new URL(IMAGE_URL);
@@ -70,6 +74,7 @@ public class JsExecTest {
   }
 
   @Test
+  @Ignore
   public void main() {
     try {
       URL obj = new URL(IMAGE_URL);

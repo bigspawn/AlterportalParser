@@ -2,7 +2,6 @@ package ru.bigspawn.parser;
 
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -42,18 +41,18 @@ public class Worker implements Runnable {
   private int postedNewsCount;
   private int pageNumber = 1;
 
-  public Worker(Parser parser, Bot bot, String loggerName) throws UnsupportedEncodingException {
+  public Worker(Parser parser, Bot bot, String loggerName) {
     this.parser = parser;
     this.bot = bot;
     this.logger = LogManager.getLogger(loggerName);
   }
 
-  private void createConnection() throws SQLException, ClassNotFoundException {
-    Class.forName("org.postgresql.Driver");
+  private void createConnection() throws SQLException {
     connection = DriverManager.getConnection(
         Configuration.getInstance().getDbUrl(),
         Configuration.getInstance().getDbUser(),
-        Configuration.getInstance().getDbPassword());
+        Configuration.getInstance().getDbPassword()
+    );
   }
 
   @Override
@@ -68,7 +67,7 @@ public class Worker implements Runnable {
         }
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
-      } catch (SQLException | ClassNotFoundException e) {
+      } catch (SQLException e) {
         logger.error(e, e);
         sleep(e.getMessage());
       }
@@ -89,6 +88,7 @@ public class Worker implements Runnable {
             }
           } else {
             if (insetToDatabase(article)) {
+              //todo: доделать - если не отправилось но есть в БД - надо или перепарсить или заново оправить
               sendToChannel(article);
               logger.info("Sleep " + SLEEPING_TIME_FOR_NEWS + " seconds");
               TimeUnit.SECONDS.sleep(SLEEPING_TIME_FOR_NEWS);
@@ -158,7 +158,7 @@ public class Worker implements Runnable {
     return false;
   }
 
-  private synchronized void sendToChannel(News news) {
+  private void sendToChannel(News news) {
     try {
       logger.info("Send news: " + news);
       bot.sendNewsToChannel(news, TELEGRAM_CHANEL, logger);
@@ -169,13 +169,8 @@ public class Worker implements Runnable {
 
   @Override
   public String toString() {
-    return "Worker{" +
-        "parser=" + parser +
-        ", bot=" + bot +
-        ", logger=" + logger +
-        ", connection=" + connection +
-        ", postedNewsCount=" + postedNewsCount +
-        ", pageNumber=" + pageNumber +
-        '}';
+    return String.format(
+        "Worker{parser=%s, bot=%s, logger=%s, connection=%s, postedNewsCount=%d, pageNumber=%d}",
+        parser, bot, logger, connection, postedNewsCount, pageNumber);
   }
 }

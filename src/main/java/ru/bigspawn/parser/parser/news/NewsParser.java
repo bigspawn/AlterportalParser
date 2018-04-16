@@ -1,4 +1,4 @@
-package ru.bigspawn.parser.parser;
+package ru.bigspawn.parser.parser.news;
 
 import ru.bigspawn.parser.entity.News;
 import ru.bigspawn.parser.entity.NewsType;
