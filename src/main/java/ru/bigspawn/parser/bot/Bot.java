@@ -10,6 +10,7 @@ import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.bigspawn.parser.Configuration;
@@ -22,6 +23,10 @@ import ru.bigspawn.parser.entity.News;
  * Created by bigspawn on 15.06.2017.
  */
 public class Bot extends TelegramLongPollingBot {
+
+  public Bot(DefaultBotOptions instance) {
+    super(instance);
+  }
 
   public synchronized void sendNewsToChannel(News news, String chatId, Logger logger) {
     logger.debug("Bot send news " + news + " into channel");

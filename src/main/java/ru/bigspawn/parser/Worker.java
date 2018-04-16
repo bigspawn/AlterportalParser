@@ -47,8 +47,7 @@ public class Worker implements Runnable {
     this.logger = LogManager.getLogger(loggerName);
   }
 
-  private void createConnection() throws SQLException, ClassNotFoundException {
-    Class.forName("org.postgresql.Driver");
+  private void createConnection() throws SQLException {
     connection = DriverManager.getConnection(
         Configuration.getInstance().getDbUrl(),
         Configuration.getInstance().getDbUser(),
@@ -68,7 +67,7 @@ public class Worker implements Runnable {
         }
       } catch (InterruptedException | IOException e) {
         logger.error(e, e);
-      } catch (SQLException | ClassNotFoundException e) {
+      } catch (SQLException e) {
         logger.error(e, e);
         sleep(e.getMessage());
       }
@@ -159,7 +158,7 @@ public class Worker implements Runnable {
     return false;
   }
 
-  private synchronized void sendToChannel(News news) {
+  private void sendToChannel(News news) {
     try {
       logger.info("Send news: " + news);
       bot.sendNewsToChannel(news, TELEGRAM_CHANEL, logger);
@@ -170,13 +169,8 @@ public class Worker implements Runnable {
 
   @Override
   public String toString() {
-    return "Worker{" +
-        "parser=" + parser +
-        ", bot=" + bot +
-        ", logger=" + logger +
-        ", connection=" + connection +
-        ", postedNewsCount=" + postedNewsCount +
-        ", pageNumber=" + pageNumber +
-        '}';
+    return String.format(
+        "Worker{parser=%s, bot=%s, logger=%s, connection=%s, postedNewsCount=%d, pageNumber=%d}",
+        parser, bot, logger, connection, postedNewsCount, pageNumber);
   }
 }
