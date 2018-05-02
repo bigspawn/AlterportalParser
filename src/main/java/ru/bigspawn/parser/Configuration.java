@@ -33,6 +33,7 @@ public class Configuration {
   private int sleepingTimeForNews;
   private int maxRepeatedNews;
   private int threads;
+  private boolean useProxy;
   private String proxyHost;
   private int proxyPort;
 
@@ -44,14 +45,14 @@ public class Configuration {
     }
   }
 
+  public static Configuration getInstance() {
+    return instance;
+  }
+
   private static void setIniConfigurations(Ini ini) {
     Config conf = new Config();
     conf.setMultiOption(true);
     ini.setConfig(conf);
-  }
-
-  public static Configuration getInstance() {
-    return instance;
   }
 
   private void initConfigs() throws IOException {
@@ -66,8 +67,11 @@ public class Configuration {
     setTelegramBot(ini.get(SECTION_BOT, "TELEGRAM_BOT"));
     setTelegramBotName(ini.get(SECTION_BOT, "TELEGRAM_BOT_NAME"));
     setTelegramChanel(ini.get(SECTION_BOT, "TELEGRAM_CHANEL"));
-    setProxyHost(ini.get(SECTION_BOT, "PROXY_HOST"));
-    setProxyPort(Integer.valueOf(ini.get(SECTION_BOT, "PROXY_PORT")));
+    setUseProxy(ini.containsKey("PROXY_HOST"));
+    if (useProxy) {
+      setProxyHost(ini.get(SECTION_BOT, "PROXY_HOST"));
+      setProxyPort(Integer.valueOf(ini.get(SECTION_BOT, "PROXY_PORT")));
+    }
     setDbUrl(ini.get(SECTION_PARSER, "DB_URL"));
     setDbUser(ini.get(SECTION_PARSER, "DB_USER"));
     setDbPassword(ini.get(SECTION_PARSER, "DB_PASSWD"));
@@ -191,11 +195,25 @@ public class Configuration {
     this.proxyPort = proxyPort;
   }
 
+  public boolean isUseProxy() {
+    return useProxy;
+  }
+
+  public void setUseProxy(boolean useProxy) {
+    this.useProxy = useProxy;
+  }
+
   @Override
   public String toString() {
-    return String.format(
-        "Configuration{urls=%s, telegramChanel='%s', telegramBot='%s', telegramBotName='%s', dbUrl='%s', dbUser='%s', dbPassword='%s', dbName='%s', sleepingTime=%d', sleepingTimeForNews=%d', maxRepeatedNews=%d', threads=%d}",
-        urls, telegramChanel, telegramBot, telegramBotName, dbUrl, dbUser, dbPassword, dbName,
-        sleepingTime, sleepingTimeForNews, maxRepeatedNews, threads);
+    return new StringBuilder().append("Configuration{").append("urls=").append(urls)
+        .append(", telegramChanel='").append(telegramChanel).append('\'').append(", telegramBot='")
+        .append(telegramBot).append('\'').append(", telegramBotName='").append(telegramBotName)
+        .append('\'').append(", dbUrl='").append(dbUrl).append('\'').append(", dbUser='")
+        .append(dbUser).append('\'').append(", dbPassword='").append(dbPassword).append('\'')
+        .append(", dbName='").append(dbName).append('\'').append(", sleepingTime=")
+        .append(sleepingTime).append(", sleepingTimeForNews=").append(sleepingTimeForNews)
+        .append(", maxRepeatedNews=").append(maxRepeatedNews).append(", threads=").append(threads)
+        .append(", useProxy=").append(useProxy).append(", proxyHost='").append(proxyHost)
+        .append('\'').append(", proxyPort=").append(proxyPort).append('}').toString();
   }
 }

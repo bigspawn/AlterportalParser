@@ -53,7 +53,7 @@ public class NewsPageParser implements Callable<News>, NewsParser {
           logger.info("News url: " + url);
           News news = parse(type, url);
           if (news != null) {
-            logger.debug("Parse news: " + news);
+            logger.debug("Parse news: " + news.getTitle());
             return news;
           }
         }

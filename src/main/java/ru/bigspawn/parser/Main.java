@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.logging.log4j.LogManager;
@@ -34,33 +33,34 @@ public class Main {
       ApiContextInitializer.init();
       Bot bot = getTelegramBot();
       startWorkers(bot);
-    } catch (ClassNotFoundException | TelegramApiRequestException | InterruptedException e) {
+    } catch (ClassNotFoundException | TelegramApiRequestException e) {
       logger.error(e, e);
     }
   }
 
   private static Bot getTelegramBot() throws TelegramApiRequestException {
-    RequestConfig requestConfig = RequestConfig.copy(RequestConfig.custom().build())
-        .setProxy(
-            new HttpHost(
-                Configuration.getInstance().getProxyHost(),
-                Configuration.getInstance().getProxyPort()))
-        .build();
     DefaultBotOptions instance = ApiContext.getInstance(DefaultBotOptions.class);
-    instance.setRequestConfig(requestConfig);
+    if (Configuration.getInstance().isUseProxy()) {
+      RequestConfig requestConfig = RequestConfig.copy(RequestConfig.custom().build())
+          .setProxy(
+              new HttpHost(
+                  Configuration.getInstance().getProxyHost(),
+                  Configuration.getInstance().getProxyPort()))
+          .build();
+      instance.setRequestConfig(requestConfig);
+    }
     Bot bot = new Bot(instance);
     TelegramBotsApi botsApi = new TelegramBotsApi();
     botsApi.registerBot(bot);
     return bot;
   }
 
-  private static void startWorkers(Bot bot) throws InterruptedException {
+  private static void startWorkers(Bot bot) {
     List<String> urls = Configuration.getInstance().getUrls();
     logger
         .info(String.format("Start workers %d - %s", urls.size(), Arrays.toString(urls.toArray())));
     for (String url : urls) {
       startWorker(bot, url);
-      TimeUnit.SECONDS.sleep(10);
     }
   }
 
