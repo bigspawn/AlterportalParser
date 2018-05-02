@@ -1,5 +1,6 @@
 package ru.bigspawn.parser.entity;
 
+import java.util.Objects;
 import org.joda.time.DateTime;
 import ru.bigspawn.parser.Constant;
 import ru.bigspawn.parser.Utils;
@@ -29,8 +30,7 @@ public class News {
   }
 
   public News(String title, NewsType type, DateTime dateTime, String genre, String format,
-      String country, String playlist, String downloadURL, String imageURL,
-      String pageURL) {
+      String country, String playlist, String downloadURL, String imageURL, String pageURL) {
     this.title = title;
     this.type = type;
     this.dateTime = dateTime;
@@ -141,53 +141,24 @@ public class News {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-
     News news = (News) o;
-
-    if (title != null ? !title.equals(news.title) : news.title != null) {
-      return false;
-    }
-    if (type != news.type) {
-      return false;
-    }
-    if (dateTime != null ? !dateTime.toDateMidnight().isEqual(news.dateTime.toDateMidnight())
-        : news.dateTime != null) {
-      return false;
-    }
-    if (genre != null ? !genre.equals(news.genre) : news.genre != null) {
-      return false;
-    }
-    if (format != null ? !format.equals(news.format) : news.format != null) {
-      return false;
-    }
-    if (country != null ? !country.equals(news.country) : news.country != null) {
-      return false;
-    }
-    if (playlist != null ? !playlist.equals(news.playlist) : news.playlist != null) {
-      return false;
-    }
-    if (downloadURL != null ? !downloadURL.equals(news.downloadURL) : news.downloadURL != null) {
-      return false;
-    }
-    if (imageURL != null ? imageURL.equals(news.imageURL) : news.imageURL == null) {
-      return false;
-    }
-    return pageURL != null ? pageURL.equals(news.pageURL) : news.pageURL == null;
+    return Objects.equals(title, news.title) &&
+        type == news.type &&
+        Objects.equals(dateTime, news.dateTime) &&
+        Objects.equals(genre, news.genre) &&
+        Objects.equals(format, news.format) &&
+        Objects.equals(country, news.country) &&
+        Objects.equals(playlist, news.playlist) &&
+        Objects.equals(downloadURL, news.downloadURL) &&
+        Objects.equals(imageURL, news.imageURL) &&
+        Objects.equals(pageURL, news.pageURL);
   }
 
   @Override
   public int hashCode() {
-    int result = title.hashCode();
-    result = 31 * result + type.hashCode();
-    result = 31 * result + dateTime.hashCode();
-    result = 31 * result + genre.hashCode();
-    result = 31 * result + format.hashCode();
-    result = 31 * result + country.hashCode();
-    result = 31 * result + playlist.hashCode();
-    result = 31 * result + (downloadURL != null ? downloadURL.hashCode() : 0);
-    result = 31 * result + (imageURL != null ? imageURL.hashCode() : 0);
-    result = 31 * result + (pageURL != null ? pageURL.hashCode() : 0);
-    return result;
+    return Objects
+        .hash(title, type, dateTime, genre, format, country, playlist, downloadURL, imageURL,
+            pageURL);
   }
 
   @Override

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.apache.logging.log4j.LogManager;
@@ -69,7 +68,7 @@ public class AlterPortalParser implements Parser {
     } catch (InterruptedException e) {
       logger.error(e, e);
     }
-    logger.debug("List of news: " + Arrays.toString(newsList.toArray()));
+//    logger.debug("List of news: " + Arrays.toString(newsList.toArray()));
     return newsList;
   }
 

@@ -33,6 +33,8 @@ public class Worker implements Runnable {
       "INSERT INTO %s (title, id_news_type, date, gender, format, country, playlist, download_url, image_url, page_url) "
           + "VALUES (?, (SELECT id_news_type FROM news_type WHERE name = ?), ?, ?, ?, ?, ?, ?, ?, ?)",
       Configuration.getInstance().getDbName());
+  public static final int FIRST_PAGE = 1;
+  public static final int ZERO_POSTED_NEWS = 0;
 
   private Parser parser;
   private Bot bot;
@@ -112,9 +114,9 @@ public class Worker implements Runnable {
 
   private void sleep(String message) {
     try {
-      logger.info(message + ". Sleep " + SLEEPING_TIME + " minutes");
-      pageNumber = 1;
-      postedNewsCount = 0;
+      logger.info(String.format("%s. Sleep %d minutes", message, SLEEPING_TIME));
+      pageNumber = FIRST_PAGE;
+      postedNewsCount = ZERO_POSTED_NEWS;
       logger.debug(this);
       TimeUnit.MINUTES.sleep(SLEEPING_TIME);
     } catch (InterruptedException e) {
@@ -127,13 +129,13 @@ public class Worker implements Runnable {
       ps.setString(1, news.getTitle());
       ResultSet rs = ps.executeQuery();
       if (rs.next()) {
-        logger.info("News '" + news.getTitle() + "' is already posted!");
+        logger.info(String.format("News '%s' is already posted!", news.getTitle()));
         return true;
       }
     } catch (SQLException e) {
       logger.error(e, e);
     }
-    logger.debug("News is new: " + news);
+//    logger.debug("News is new: " + news);
     return false;
   }
 
