@@ -39,8 +39,9 @@ public class Main {
   }
 
   private static Bot getTelegramBot() throws TelegramApiRequestException {
-    DefaultBotOptions instance = ApiContext.getInstance(DefaultBotOptions.class);
+    Bot bot = new Bot();
     if (Configuration.getInstance().isUseProxy()) {
+      DefaultBotOptions instance = ApiContext.getInstance(DefaultBotOptions.class);
       RequestConfig requestConfig = RequestConfig.copy(RequestConfig.custom().build())
           .setProxy(
               new HttpHost(
@@ -48,8 +49,8 @@ public class Main {
                   Configuration.getInstance().getProxyPort()))
           .build();
       instance.setRequestConfig(requestConfig);
+      bot = new Bot(instance);
     }
-    Bot bot = new Bot(instance);
     TelegramBotsApi botsApi = new TelegramBotsApi();
     botsApi.registerBot(bot);
     return bot;

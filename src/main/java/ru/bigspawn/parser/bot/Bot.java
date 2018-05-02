@@ -24,6 +24,9 @@ import ru.bigspawn.parser.entity.News;
  */
 public class Bot extends TelegramLongPollingBot {
 
+  public Bot() {
+  }
+
   public Bot(DefaultBotOptions instance) {
     super(instance);
   }

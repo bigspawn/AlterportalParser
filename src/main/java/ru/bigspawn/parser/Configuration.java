@@ -67,7 +67,7 @@ public class Configuration {
     setTelegramBot(ini.get(SECTION_BOT, "TELEGRAM_BOT"));
     setTelegramBotName(ini.get(SECTION_BOT, "TELEGRAM_BOT_NAME"));
     setTelegramChanel(ini.get(SECTION_BOT, "TELEGRAM_CHANEL"));
-    setUseProxy(ini.containsKey("PROXY_HOST"));
+    setUseProxy(ini.get(SECTION_BOT, "PROXY_HOST") != null);
     if (useProxy) {
       setProxyHost(ini.get(SECTION_BOT, "PROXY_HOST"));
       setProxyPort(Integer.valueOf(ini.get(SECTION_BOT, "PROXY_PORT")));
