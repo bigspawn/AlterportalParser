@@ -8,10 +8,8 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.telegram.telegrambots.ApiContext;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import ru.bigspawn.parser.bot.Bot;
 import ru.bigspawn.parser.parser.AlterPortalParser;
@@ -45,15 +43,13 @@ public class Main {
     Bot bot = new Bot();
 
     if (Configuration.getInstance().isUseProxy()) {
-      DefaultBotOptions instance = ApiContext.getInstance(DefaultBotOptions.class);
       RequestConfig requestConfig = RequestConfig.copy(RequestConfig.custom().build())
           .setProxy(
               new HttpHost(
                   Configuration.getInstance().getProxyHost(),
                   Configuration.getInstance().getProxyPort()))
           .build();
-      instance.setRequestConfig(requestConfig);
-      bot = new Bot(instance);
+      bot.getOptions().setRequestConfig(requestConfig);
     } else {
       logger.info("Not use proxy");
     }
