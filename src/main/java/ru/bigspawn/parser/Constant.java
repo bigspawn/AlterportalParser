@@ -17,10 +17,12 @@ public class Constant {
   public static final String XPATH_NEWS_BODY_DIV = "//div[contains(@id, \"news-id\")]";
   public static final String DOWNLOAD_BUTTON_TEXT = "Download";
   public static final String NEWS_PAGE_BUTTON_TEXT = "Page";
-  public static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("dd MMMM yyyy")
-      .withLocale(new Locale("ru"));
-  public static final List<String> DOWNLOAD_RESOURCES = Collections
-      .unmodifiableList(new ArrayList<String>() {
+
+  public static final DateTimeFormatter FORMATTER =
+      DateTimeFormat.forPattern("dd MMMM yyyy").withLocale(new Locale("ru"));
+
+  public static final List<String> DOWNLOAD_RESOURCES = Collections.unmodifiableList(
+      new ArrayList<String>() {
         {
           add("mail.ru");
           add("yadi.sk");

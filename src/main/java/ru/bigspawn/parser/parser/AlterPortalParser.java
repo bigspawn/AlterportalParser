@@ -20,8 +20,9 @@ import ru.bigspawn.parser.parser.news.NewsPageParser;
 
 public class AlterPortalParser implements Parser {
 
+  private static final String SUSPENDED_SITE = "cgi-sys/suspendedpage.cgi";
+  private final Logger logger;
   private String pageUrl;
-  private Logger logger;
 
   public AlterPortalParser(String pageUrl) {
     this.pageUrl = pageUrl;
@@ -31,13 +32,17 @@ public class AlterPortalParser implements Parser {
   @Override
   public List<News> parse(int pageNumber) throws UnsupportedEncodingException {
     String pageURL = getPageURL(pageNumber);
+
     logger.info("Start parsing news from " + pageURL);
+
     try (WebClient client = Utils.getWebClientWithoutCSSAndJS()) {
       HtmlPage page = client.getPage(pageURL);
-      if (page.getBaseURL().getFile().contains("cgi-sys/suspendedpage.cgi")) {
-        logger.error("Site is unavailable! Page: " + page.getBaseURL());
+
+      if (page.getBaseURL().getFile().contains(SUSPENDED_SITE)) {
+        logger.error(String.format("Site is unavailable! Page: %s", page.getBaseURL()));
         return null;
       }
+
       return getNews(page);
     } catch (IOException e) {
       logger.error(e, e);
@@ -46,7 +51,7 @@ public class AlterPortalParser implements Parser {
   }
 
   private String getPageURL(int pageNumber) throws UnsupportedEncodingException {
-    return pageUrl + URLEncoder.encode(String.valueOf(pageNumber), "UTF-8") + '/';
+    return String.format("%s%s/", pageUrl, URLEncoder.encode(String.valueOf(pageNumber), "UTF-8"));
   }
 
   private List<News> getNews(HtmlPage page) {

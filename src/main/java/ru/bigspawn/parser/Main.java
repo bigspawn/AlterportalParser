@@ -29,9 +29,12 @@ public class Main {
     try {
       logger.info("Start application");
       logger.info(System.getProperties().get("log4j.configurationFile"));
+
       Class.forName("org.postgresql.Driver");
+
       ApiContextInitializer.init();
       Bot bot = getTelegramBot();
+
       startWorkers(bot);
     } catch (ClassNotFoundException | TelegramApiRequestException e) {
       logger.error(e, e);
@@ -40,6 +43,7 @@ public class Main {
 
   private static Bot getTelegramBot() throws TelegramApiRequestException {
     Bot bot = new Bot();
+
     if (Configuration.getInstance().isUseProxy()) {
       DefaultBotOptions instance = ApiContext.getInstance(DefaultBotOptions.class);
       RequestConfig requestConfig = RequestConfig.copy(RequestConfig.custom().build())
@@ -50,16 +54,22 @@ public class Main {
           .build();
       instance.setRequestConfig(requestConfig);
       bot = new Bot(instance);
+    } else {
+      logger.info("Not use proxy");
     }
+
     TelegramBotsApi botsApi = new TelegramBotsApi();
     botsApi.registerBot(bot);
+
     return bot;
   }
 
   private static void startWorkers(Bot bot) {
     List<String> urls = Configuration.getInstance().getUrls();
+
     logger
         .info(String.format("Start workers %d - %s", urls.size(), Arrays.toString(urls.toArray())));
+
     for (String url : urls) {
       startWorker(bot, url);
     }
@@ -69,9 +79,12 @@ public class Main {
     AlterPortalParser parser = new AlterPortalParser(url);
     String loggerName = Utils.getLoggerNameFromUrl(url);
     Worker worker = new Worker(parser, bot, loggerName);
+
     logger.debug("Create " + worker);
+
     Thread thread = new Thread(worker, "Thread: " + loggerName);
     thread.start();
+
     logger.debug("Start " + thread);
   }
 }

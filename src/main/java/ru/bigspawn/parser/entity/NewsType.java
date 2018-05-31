@@ -1,8 +1,11 @@
 package ru.bigspawn.parser.entity;
 
+import lombok.ToString;
+
 /**
  * Created by bigspawn on 31.05.2017.
  */
+@ToString
 public enum NewsType {
   //  News("Новости"),
   Albums("Альбомы"),
@@ -26,8 +29,4 @@ public enum NewsType {
     return name;
   }
 
-  @Override
-  public String toString() {
-    return this.name;
-  }
 }

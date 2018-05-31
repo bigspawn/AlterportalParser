@@ -27,8 +27,8 @@ import ru.bigspawn.parser.entity.NewsType;
 
 public class NewsPageParser implements Callable<News>, NewsParser {
 
-  private HtmlElement content;
-  private Logger logger;
+  private final HtmlElement content;
+  private final Logger logger;
 
   public NewsPageParser(HtmlElement content, Logger logger) {
     this.content = content;

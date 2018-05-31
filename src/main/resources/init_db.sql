@@ -1,5 +1,5 @@
-CREATE SEQUENCE news_type_ids;
-CREATE TABLE news_type (
+CREATE SEQUENCE public.news_type_ids;
+CREATE TABLE public.news_type (
   id_news_type INT PRIMARY KEY DEFAULT NEXTVAL('news_type_ids'),
   name         VARCHAR(100)
 );
@@ -17,9 +17,10 @@ INSERT INTO public.news_type (id_news_type, name) VALUES (11, 'Новые тре
 INSERT INTO public.news_type (id_news_type, name) VALUES (12, 'Концерты');
 INSERT INTO public.news_type (id_news_type, name) VALUES (10, 'Аудио CD');
 
-CREATE SEQUENCE news_test_ids;
-CREATE TABLE news_test (
-  id_news      INT PRIMARY KEY DEFAULT NEXTVAL('news_test_ids'),
+CREATE SEQUENCE public.news_ids;
+
+CREATE TABLE public.news (
+  id_news      INT PRIMARY KEY DEFAULT NEXTVAL('news_ids'),
   title        VARCHAR(255),
   id_news_type INT REFERENCES news_type (id_news_type),
   date         TIMESTAMP,
@@ -29,4 +30,5 @@ CREATE TABLE news_test (
   playlist     TEXT,
   download_url VARCHAR(255),
   image_url    VARCHAR(255)
+
 );
