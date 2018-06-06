@@ -1,6 +1,7 @@
 package ru.bigspawn.parser;
 
-import java.util.Arrays;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,7 +13,6 @@ import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import ru.bigspawn.parser.bot.Bot;
-import ru.bigspawn.parser.parser.AlterPortalParser;
 
 /**
  * Created by bigspawn on 30.05.2017.
@@ -22,6 +22,8 @@ public class Main {
   public static final Logger logger = LogManager.getLogger(Main.class.getName());
   public static final ExecutorService executor = Executors
       .newFixedThreadPool(Configuration.getInstance().getThreads());
+
+  private static final List<Thread> threads = new ArrayList<>();
 
   public static void main(String[] args) {
     try {
@@ -34,7 +36,7 @@ public class Main {
       Bot bot = getTelegramBot();
 
       startWorkers(bot);
-    } catch (ClassNotFoundException | TelegramApiRequestException e) {
+    } catch (ClassNotFoundException | TelegramApiRequestException | SQLException e) {
       logger.error(e, e);
     }
   }
@@ -60,27 +62,14 @@ public class Main {
     return bot;
   }
 
-  private static void startWorkers(Bot bot) {
+  private static void startWorkers(Bot bot) throws SQLException {
     List<String> urls = Configuration.getInstance().getUrls();
-
-    logger
-        .info(String.format("Start workers %d - %s", urls.size(), Arrays.toString(urls.toArray())));
-
     for (String url : urls) {
-      startWorker(bot, url);
+      Thread thread = new Thread(new Worker(url), "Thread: " + Utils.getLoggerNameFromUrl(url));
+      threads.add(thread);
     }
+    threads.add(new Thread(new QueueWorker(bot), "Thread: " + QueueWorker.class.getSimpleName()));
+    threads.forEach(Thread::start);
   }
 
-  private static void startWorker(Bot bot, String url) {
-    AlterPortalParser parser = new AlterPortalParser(url);
-    String loggerName = Utils.getLoggerNameFromUrl(url);
-    Worker worker = new Worker(parser, bot, loggerName);
-
-    logger.debug("Create " + worker);
-
-    Thread thread = new Thread(worker, "Thread: " + loggerName);
-    thread.start();
-
-    logger.debug("Start " + thread);
-  }
 }

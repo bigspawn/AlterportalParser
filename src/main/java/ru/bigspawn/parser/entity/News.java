@@ -16,7 +16,7 @@ import ru.bigspawn.parser.Utils;
 @ToString
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "dateTime, downloadURL, imageURL")
 @NoArgsConstructor
 @AllArgsConstructor
 public class News {

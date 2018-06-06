@@ -1,9 +1,10 @@
-package ru.bigspawn.parser.parser.news;
+package ru.bigspawn.parser;
 
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DATE;
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_DIV;
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_BODY_TITLE;
 import static ru.bigspawn.parser.Constant.XPATH_NEWS_CONTENT;
+import static ru.bigspawn.parser.QueueWorker.queue;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -14,52 +15,52 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.joda.time.DateTime;
-import ru.bigspawn.parser.Constant;
-import ru.bigspawn.parser.Utils;
 import ru.bigspawn.parser.entity.News;
 import ru.bigspawn.parser.entity.NewsType;
 
-public class NewsPageParser implements Callable<News>, NewsParser {
+public class NewsPageParser implements NewsParser {
 
-  private final HtmlElement content;
-  private final Logger logger;
-
-  public NewsPageParser(HtmlElement content, Logger logger) {
-    this.content = content;
-    this.logger = logger;
-  }
+  private static final Logger logger = LogManager.getLogger(NewsPageParser.class);
 
   @Override
-  public News call() {
+  public void getNews(HtmlElement content) {
     List<HtmlElement> categories = content.getElementsByAttribute("td", "class", "category");
+
     if (categories != null && !categories.isEmpty()) {
+
       String category = categories.get(0).asText().trim();
       Optional<NewsType> optional = Arrays.stream(NewsType.values())
           .filter(c -> category.equals(c.getName()) || category.contains(c.getName()))
           .findFirst();
+
       if (optional.isPresent()) {
-        logger.debug("News category: " + category);
+
         NewsType type = optional.get();
         List<HtmlElement> titles = content.getElementsByAttribute("td", "class", "ntitle");
+
         if (titles != null && !titles.isEmpty()) {
           HtmlElement title = titles.get(0);
           String url = title.getElementsByTagName("a").get(0).getAttribute("href");
-          logger.info("News url: " + url);
+
           News news = parse(type, url);
+
           if (news != null) {
-            logger.debug("Parse news: " + news.getTitle());
-            return news;
+            if (!queue.contains(news)) {
+              logger.info("Add " + news.getTitle());
+              queue.add(news);
+            } else {
+              logger.info("New already add in queue!");
+            }
           }
         }
       }
     }
-    return null;
   }
 
   @Override
@@ -85,8 +86,6 @@ public class NewsPageParser implements Callable<News>, NewsParser {
           news.setDateTime(getDateTime(content));
           news.setPageURL(newsURL);
           news.setDownloadURL(getHref(body));
-//          if (type != NewsType.News) {
-//          }
           return news;
         }
       }
@@ -213,4 +212,5 @@ public class NewsPageParser implements Callable<News>, NewsParser {
     }
     return Strings.EMPTY;
   }
+
 }

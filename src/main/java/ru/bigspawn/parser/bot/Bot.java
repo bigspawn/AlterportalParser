@@ -32,7 +32,6 @@ public class Bot extends TelegramLongPollingBot {
   }
 
   public synchronized void sendNewsToChannel(News news, String chatId, Logger logger) {
-    logger.debug("Bot send news " + news + " into channel");
     String textForMessage = news.getTextForMessage();
     if (news.getImageURL() != null && textForMessage != null && !textForMessage.isEmpty()) {
       if (news.getDownloadURL() != null && !news.getDownloadURL().isEmpty()) {
@@ -50,10 +49,8 @@ public class Bot extends TelegramLongPollingBot {
     sendPhotoRequest.setChatId(chatId);
     sendPhotoRequest.setPhoto(imageURL);
     try {
-      logger.debug("Send image: " + imageURL);
       sendPhoto(sendPhotoRequest);
     } catch (TelegramApiException e) {
-      logger.error(e, e);
       sendDownloadedImage(news, chatId, logger);
     }
   }
@@ -64,7 +61,6 @@ public class Bot extends TelegramLongPollingBot {
     Response response;
     try {
       response = client.newCall(request).execute();
-      logger.info("Get response: " + response);
       if (!response.isSuccessful()) {
         throw new IOException("Failed to download file: " + response);
       }
@@ -83,7 +79,7 @@ public class Bot extends TelegramLongPollingBot {
   private void sendMessageToChannel(String chatId, News news, Logger logger) {
     try {
       sendMessage(sendNewsWithDownloadButton(chatId, news));
-      logger.info("Send news: " + news.getTitle() + " to channel");
+      logger.info("Send " + news);
     } catch (TelegramApiException e) {
       logger.error(e, e);
     }

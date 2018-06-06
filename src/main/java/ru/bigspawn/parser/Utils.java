@@ -4,6 +4,8 @@ import static ru.bigspawn.parser.Constant.DOWNLOAD_BUTTON_TEXT;
 import static ru.bigspawn.parser.Constant.NEWS_PAGE_BUTTON_TEXT;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -60,5 +62,10 @@ public class Utils {
       downloadButton.setUrl(url);
       row.add(downloadButton);
     }
+  }
+
+  public static String getPageURL(String pageUrl, int pageNumber)
+      throws UnsupportedEncodingException {
+    return String.format("%s%s/", pageUrl, URLEncoder.encode(String.valueOf(pageNumber), "UTF-8"));
   }
 }
